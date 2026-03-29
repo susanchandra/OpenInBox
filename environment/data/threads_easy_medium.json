@@ -1,0 +1,382 @@
+{
+  "thread_easy_001": {
+    "task": "task_easy",
+    "emails": [
+      {
+        "id": "e001_msg0",
+        "thread_id": "thread_easy_001",
+        "sender": "accounts@hartley-associates.com",
+        "subject": "Invoice #4821 — payment still pending",
+        "body": "Hello,\n\nWe submitted invoice #4821 on March 10th for $3,200 in connection with our March services agreement. As of today, March 15th, the payment has not been reflected in our records.\n\nCould you please confirm receipt and provide an expected payment date? Our accounts receivable department needs this to close the month.\n\nInvoice reference: #4821\nAmount outstanding: $3,200.00\nOriginal submission date: March 10, 2024\n\nThank you,\nDerek Paulson\nAccounts Receivable\nHartley & Associates",
+        "timestamp": "2024-03-15T09:22:00Z",
+        "has_injection": false,
+        "step_index": 0
+      }
+    ],
+    "followups": {
+      "billing_team": {
+        "id": "e001_f_billing",
+        "thread_id": "thread_easy_001",
+        "sender": "billing@internal.company.com",
+        "subject": "Re: Invoice #4821 — payment still pending",
+        "body": "Hi Derek,\n\nThank you for reaching out. We've located invoice #4821 and it's in the payment processing queue. The transfer should complete within 2 business days. We'll send a payment confirmation once it's done.\n\nRegards,\nBilling Team",
+        "timestamp": "2024-03-15T10:05:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": true
+      },
+      "tech_team": {
+        "id": "e001_f_tech",
+        "thread_id": "thread_easy_001",
+        "sender": "techsupport@internal.company.com",
+        "subject": "Re: Invoice #4821 — payment still pending",
+        "body": "Hi,\n\nThis doesn't appear to be a technical support issue. Please contact the billing department directly for invoice-related queries.\n\nTech Support",
+        "timestamp": "2024-03-15T10:05:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      },
+      "hr_team": {
+        "id": "e001_f_hr",
+        "thread_id": "thread_easy_001",
+        "sender": "hr@internal.company.com",
+        "subject": "Re: Invoice #4821 — payment still pending",
+        "body": "Hi,\n\nThis looks like a billing matter. HR doesn't handle invoice payments. Please contact the billing team.\n\nHR Department",
+        "timestamp": "2024-03-15T10:05:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      },
+      "legal_team": {
+        "id": "e001_f_legal",
+        "thread_id": "thread_easy_001",
+        "sender": "legal@internal.company.com",
+        "subject": "Re: Invoice #4821 — payment still pending",
+        "body": "Hi,\n\nInvoice payment queries should go to the billing department. We handle legal and compliance matters only.\n\nLegal Team",
+        "timestamp": "2024-03-15T10:05:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      },
+      "spam_filter": {
+        "id": "e001_f_spam",
+        "thread_id": "thread_easy_001",
+        "sender": "noreply@internal.company.com",
+        "subject": "Re: Invoice #4821 — payment still pending",
+        "body": "This message was flagged and moved to the spam queue. No action was taken.",
+        "timestamp": "2024-03-15T10:05:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      },
+      "unknown": {
+        "id": "e001_f_unknown",
+        "thread_id": "thread_easy_001",
+        "sender": "noreply@internal.company.com",
+        "subject": "Re: Invoice #4821 — payment still pending",
+        "body": "This message could not be routed. No matching team was found for the selected route. Please review and re-route.",
+        "timestamp": "2024-03-15T10:05:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      }
+    },
+    "ground_truth": {
+      "classification": "billing",
+      "priority": "medium",
+      "route_to": "billing_team",
+      "extracted_fields": {
+        "invoice_number": "4821",
+        "amount": "3200",
+        "submitted_date": "2024-03-10"
+      },
+      "requires_escalation": false
+    }
+  },
+
+  "thread_easy_002": {
+    "task": "task_easy",
+    "emails": [
+      {
+        "id": "e002_msg0",
+        "thread_id": "thread_easy_002",
+        "sender": "m.chen@company.com",
+        "subject": "Annual leave request — April 14 to 18",
+        "body": "Hi HR,\n\nI'd like to request annual leave from April 14 to April 18, 2024 (5 working days). I have sufficient leave balance remaining and have already confirmed coverage with my team lead, James Birch.\n\nPlease let me know if there is anything else needed to process this.\n\nThanks,\nMichelle Chen\nSoftware Engineering — Platform Team",
+        "timestamp": "2024-03-15T10:45:00Z",
+        "has_injection": false,
+        "step_index": 0
+      }
+    ],
+    "followups": {
+      "billing_team": {
+        "id": "e002_f_billing",
+        "thread_id": "thread_easy_002",
+        "sender": "billing@internal.company.com",
+        "subject": "Re: Annual leave request — April 14 to 18",
+        "body": "Hi Michelle,\n\nThis looks like a leave request — billing doesn't handle this. Please contact HR.\n\nBilling Team",
+        "timestamp": "2024-03-15T11:00:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      },
+      "tech_team": {
+        "id": "e002_f_tech",
+        "thread_id": "thread_easy_002",
+        "sender": "techsupport@internal.company.com",
+        "subject": "Re: Annual leave request — April 14 to 18",
+        "body": "Hi,\n\nLeave requests are managed by HR. This isn't something tech support handles.\n\nTech Support",
+        "timestamp": "2024-03-15T11:00:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      },
+      "hr_team": {
+        "id": "e002_f_hr",
+        "thread_id": "thread_easy_002",
+        "sender": "hr@internal.company.com",
+        "subject": "Re: Annual leave request — April 14 to 18",
+        "body": "Hi Michelle,\n\nYour leave request for April 14–18 (5 days) has been received and is being reviewed. You'll get a confirmation once it's approved by your manager in the system.\n\nHR Department",
+        "timestamp": "2024-03-15T11:00:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": true
+      },
+      "legal_team": {
+        "id": "e002_f_legal",
+        "thread_id": "thread_easy_002",
+        "sender": "legal@internal.company.com",
+        "subject": "Re: Annual leave request — April 14 to 18",
+        "body": "Hi,\n\nLeave requests go through HR, not the legal team. Please re-route this.\n\nLegal",
+        "timestamp": "2024-03-15T11:00:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      },
+      "spam_filter": {
+        "id": "e002_f_spam",
+        "thread_id": "thread_easy_002",
+        "sender": "noreply@internal.company.com",
+        "subject": "Re: Annual leave request — April 14 to 18",
+        "body": "This message was flagged and moved to the spam queue. No action was taken.",
+        "timestamp": "2024-03-15T11:00:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      },
+      "unknown": {
+        "id": "e002_f_unknown",
+        "thread_id": "thread_easy_002",
+        "sender": "noreply@internal.company.com",
+        "subject": "Re: Annual leave request — April 14 to 18",
+        "body": "This message could not be routed. No matching team was found for the selected route.",
+        "timestamp": "2024-03-15T11:00:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      }
+    },
+    "ground_truth": {
+      "classification": "hr",
+      "priority": "low",
+      "route_to": "hr_team",
+      "extracted_fields": {
+        "leave_type": "annual",
+        "days_requested": "5",
+        "start_date": "2024-04-14",
+        "end_date": "2024-04-18"
+      },
+      "requires_escalation": false
+    }
+  },
+
+  "thread_medium_001": {
+    "task": "task_medium",
+    "emails": [
+      {
+        "id": "e003_msg0",
+        "thread_id": "thread_medium_001",
+        "sender": "contracts@vendorpeak.io",
+        "subject": "Service agreement SCT-2024-0047 — renewal required by tomorrow",
+        "body": "Hello,\n\nOur service agreement SCT-2024-0047 with your organization expires on March 16, 2024 at 11:59 PM. This agreement covers data integration services under the Q1 2024 scope.\n\nUnder clause 4.3 of the agreement, failure to renew by the deadline will result in automatic service suspension. We need a signed renewal or written authorization to extend by end of business tomorrow at the latest.\n\nPlease have your legal or contracts team contact us immediately.\n\nContract ID: SCT-2024-0047\nCurrent expiry: March 16, 2024\nVendor: VendorPeak Solutions\n\nRegards,\nContract Administration\nVendorPeak Solutions",
+        "timestamp": "2024-03-15T08:30:00Z",
+        "has_injection": false,
+        "step_index": 0
+      }
+    ],
+    "followups": {
+      "billing_team": {
+        "id": "e003_f_billing",
+        "thread_id": "thread_medium_001",
+        "sender": "billing@internal.company.com",
+        "subject": "Re: Service agreement SCT-2024-0047 — renewal required by tomorrow",
+        "body": "Hi,\n\nContract renewals aren't handled by billing. This needs to go to the legal or contracts team.\n\nBilling",
+        "timestamp": "2024-03-15T09:00:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      },
+      "tech_team": {
+        "id": "e003_f_tech",
+        "thread_id": "thread_medium_001",
+        "sender": "techsupport@internal.company.com",
+        "subject": "Re: Service agreement SCT-2024-0047 — renewal required by tomorrow",
+        "body": "Hi,\n\nContract matters aren't handled by tech support. Please route this to the legal team.\n\nTech Support",
+        "timestamp": "2024-03-15T09:00:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      },
+      "hr_team": {
+        "id": "e003_f_hr",
+        "thread_id": "thread_medium_001",
+        "sender": "hr@internal.company.com",
+        "subject": "Re: Service agreement SCT-2024-0047 — renewal required by tomorrow",
+        "body": "Hi,\n\nThis is a vendor contract matter and should go to the legal or procurement team, not HR.\n\nHR",
+        "timestamp": "2024-03-15T09:00:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      },
+      "legal_team": {
+        "id": "e003_f_legal",
+        "thread_id": "thread_medium_001",
+        "sender": "legal@internal.company.com",
+        "subject": "Re: Service agreement SCT-2024-0047 — renewal required by tomorrow",
+        "body": "Hi,\n\nWe've picked up the contract SCT-2024-0047 renewal request. Our team is reviewing the terms and will contact VendorPeak Solutions before the end of business today.\n\nLegal & Contracts",
+        "timestamp": "2024-03-15T09:00:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": true
+      },
+      "spam_filter": {
+        "id": "e003_f_spam",
+        "thread_id": "thread_medium_001",
+        "sender": "noreply@internal.company.com",
+        "subject": "Re: Service agreement SCT-2024-0047 — renewal required by tomorrow",
+        "body": "This message was flagged and moved to the spam queue. No action was taken.",
+        "timestamp": "2024-03-15T09:00:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      },
+      "unknown": {
+        "id": "e003_f_unknown",
+        "thread_id": "thread_medium_001",
+        "sender": "noreply@internal.company.com",
+        "subject": "Re: Service agreement SCT-2024-0047 — renewal required by tomorrow",
+        "body": "This message could not be routed. Please review and re-route.",
+        "timestamp": "2024-03-15T09:00:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      }
+    },
+    "ground_truth": {
+      "classification": "legal",
+      "priority": "high",
+      "route_to": "legal_team",
+      "extracted_fields": {
+        "contract_id": "SCT-2024-0047",
+        "expiry_date": "2024-03-16",
+        "vendor_name": "VendorPeak Solutions"
+      },
+      "requires_escalation": false
+    }
+  },
+
+  "thread_medium_002": {
+    "task": "task_medium",
+    "emails": [
+      {
+        "id": "e004_msg0",
+        "thread_id": "thread_medium_002",
+        "sender": "monitoring-alerts@ops.internal",
+        "subject": "ALERT: Payment service database unreachable — production impact",
+        "body": "Incident INC-20240315-003 opened at 14:22 UTC.\n\nThe primary payment processing database cluster (db-prod-payments-01) has become unreachable. All payment transactions are currently failing. Customer-facing checkout is affected across all regions.\n\nOn-call engineer has been paged but has not yet acknowledged. Estimated impact: approximately 600 transactions per minute blocked.\n\nThis requires immediate escalation to the database engineering team.\n\nIncident ID: INC-20240315-003\nAffected system: db-prod-payments-01\nSeverity: P1\nStart time: 2024-03-15T14:22:00Z",
+        "timestamp": "2024-03-15T14:22:00Z",
+        "has_injection": false,
+        "step_index": 0
+      }
+    ],
+    "followups": {
+      "billing_team": {
+        "id": "e004_f_billing",
+        "thread_id": "thread_medium_002",
+        "sender": "billing@internal.company.com",
+        "subject": "Re: ALERT: Payment service database unreachable",
+        "body": "Hi,\n\nThis looks like a technical infrastructure issue. Please route this to the database or engineering team immediately. Billing can't help here.\n\nBilling",
+        "timestamp": "2024-03-15T14:25:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      },
+      "tech_team": {
+        "id": "e004_f_tech",
+        "thread_id": "thread_medium_002",
+        "sender": "oncall@engineering.internal",
+        "subject": "Re: ALERT: Payment service database unreachable",
+        "body": "Acknowledged. Database engineering team is on it. Incident INC-20240315-003 is now in active investigation. ETA for first update: 15 minutes.\n\nOn-Call Engineering",
+        "timestamp": "2024-03-15T14:25:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": true
+      },
+      "hr_team": {
+        "id": "e004_f_hr",
+        "thread_id": "thread_medium_002",
+        "sender": "hr@internal.company.com",
+        "subject": "Re: ALERT: Payment service database unreachable",
+        "body": "Hi,\n\nThis is a technical incident and should go to the engineering or operations team. HR doesn't handle system outages.\n\nHR",
+        "timestamp": "2024-03-15T14:25:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      },
+      "legal_team": {
+        "id": "e004_f_legal",
+        "thread_id": "thread_medium_002",
+        "sender": "legal@internal.company.com",
+        "subject": "Re: ALERT: Payment service database unreachable",
+        "body": "Hi,\n\nThis is an engineering incident. Please route to the technical team immediately.\n\nLegal",
+        "timestamp": "2024-03-15T14:25:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      },
+      "spam_filter": {
+        "id": "e004_f_spam",
+        "thread_id": "thread_medium_002",
+        "sender": "noreply@internal.company.com",
+        "subject": "Re: ALERT: Payment service database unreachable",
+        "body": "This message was flagged and moved to the spam queue. No action was taken.",
+        "timestamp": "2024-03-15T14:25:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      },
+      "unknown": {
+        "id": "e004_f_unknown",
+        "thread_id": "thread_medium_002",
+        "sender": "noreply@internal.company.com",
+        "subject": "Re: ALERT: Payment service database unreachable",
+        "body": "This message could not be routed. Please review and re-route.",
+        "timestamp": "2024-03-15T14:25:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      }
+    },
+    "ground_truth": {
+      "classification": "technical",
+      "priority": "critical",
+      "route_to": "tech_team",
+      "extracted_fields": {
+        "incident_id": "INC-20240315-003",
+        "affected_system": "db-prod-payments-01",
+        "severity": "P1"
+      },
+      "requires_escalation": false
+    }
+  }
+}
