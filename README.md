@@ -1,3 +1,12 @@
+---
+title: OpenInBox
+emoji: 📬
+colorFrom: blue
+colorTo: green
+sdk: docker
+pinned: false
+---
+
 # OpenInbox
 
 OpenInbox is a stateful environment for evaluating AI agents on enterprise email management tasks. An agent processes inbound emails one step at a time, classifying each one, assigning a priority, routing it to the correct internal team, and extracting structured information. The environment responds to the agent's decisions: a correct routing triggers a deterministic follow-up from that team, SLA timers tick down with each step, and in harder tasks the email thread evolves mid-conversation requiring the agent to update its understanding. All email content, follow-up paths, and ground truth are pre-authored, so every episode is fully deterministic and reproducible.
