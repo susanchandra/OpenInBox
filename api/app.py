@@ -19,6 +19,7 @@ from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
+from fastapi import Body
 from pydantic import BaseModel
 
 from environment.env import OpenInboxEnv
@@ -208,7 +209,7 @@ def _get_session(session_id: str) -> OpenInboxEnv:
 # ---------------------------------------------------------------------------
 
 @app.post("/reset")
-def reset(req: ResetRequest):
+def reset(req: Optional[ResetRequest] = Body(None)):
     """
     Start a new episode.
 
@@ -217,12 +218,19 @@ def reset(req: ResetRequest):
 
     The seed selects which thread is loaded: thread_ids[seed % len(thread_ids)].
     The same task_id + seed always produces the same episode.
+
+    The request body is optional. If omitted, defaults to task_easy with seed 0.
     """
+    # If the validator calls /reset with no body, use a safe default.
+    if req is None:
+        req = ResetRequest(task_id="task_easy", seed=0)
+
     if req.task_id not in _TASKS:
         raise HTTPException(
             status_code=400,
             detail=f"Unknown task_id: '{req.task_id}'. Valid options: {list(_TASKS)}",
         )
+
 
     env = OpenInboxEnv()
     try:
