@@ -13,6 +13,12 @@ OpenInbox is a stateful environment for evaluating AI agents on enterprise email
 
 ---
 
+## TL;DR
+
+OpenInbox is a deterministic, OpenEnv-compliant reinforcement learning environment that simulates enterprise email operations. An agent receives emails one at a time and must classify them, assign priority, route them to the correct internal team, extract structured fields, and manage evolving multi-step threads under SLA pressure. Three tasks of increasing difficulty test progressively harder agent capabilities. All graders are deterministic, all episodes are reproducible via a fixed seed, and the full evaluation loop is available as a REST API.
+
+---
+
 ## Why this task matters
 
 Email triage is a genuine daily workflow in most organizations. An agent capable of doing it reliably reduces response time, prevents SLA breaches, and keeps the right people informed. What makes this a useful benchmark is that it is not a static classification problem. The agent's decisions change what happens next, and handling multi-step threads where the topic shifts requires the agent to reason across context rather than just classify individual messages. The prompt injection detection aspect adds a realistic safety dimension: agents operating on external inputs need to recognize when those inputs are trying to hijack their behavior.
@@ -32,6 +38,17 @@ The environment maintains the following state per episode:
 The agent takes one action per step. Each action is compared against pre-authored ground truth to compute a shaped per-step reward. At the end of an episode the deterministic grader produces a final score in [0.0, 1.0] based on the full action trajectory.
 
 Episodes end when one of three conditions is met: all tickets are resolved, the agent runs out of steps, or an SLA timer reaches zero.
+
+---
+
+## What makes this environment challenging
+
+- **Partial observability.** The agent sees only the current email and prior thread history, not the full internal state of the environment (SLA timer values, routing queues, escalation records).
+- **Delayed consequences.** A wrong routing decision in step 1 means the correct follow-up never arrives, compounding the error across subsequent steps.
+- **SLA pressure.** The SLA timer counts down every step regardless of what the agent does. Indecision and incorrect actions both cost time.
+- **Multi-step thread evolution.** In the hard task, the thread topic shifts partway through. The agent must detect the change and reclassify without being explicitly told.
+- **Adversarial prompt injection.** One email in the hard task contains embedded instructions designed to hijack the agent's behavior. The agent must flag it and not act on it.
+- **Action-dependent future state.** Routing an email to the correct team triggers a deterministic follow-up email from that team. Routing to the wrong team means that follow-up never arrives.
 
 ---
 
@@ -63,6 +80,20 @@ This is the complete sequence to evaluate an agent against the environment:
 6. Call `POST /grader` with the `task_id`, `thread_id`, and `episode_log` from `GET /state` to receive a final score in `[0.0, 1.0]`.
 
 The interactive Swagger UI at `/docs` lets you run this entire flow manually without writing any code.
+
+---
+
+## Example episode (medium task)
+
+This walkthrough shows what one full episode looks like in plain English.
+
+1. The episode starts. An invoice dispute email arrives from a client. The SLA timer starts at 8 hours.
+2. The agent reads the email, classifies it as `billing`, sets priority to `high`, routes it to `billing_team`, and extracts the invoice number.
+3. The environment awards classification, routing, field extraction, and SLA urgency rewards. A follow-up email from the billing team arrives confirming the ticket.
+4. The agent processes the follow-up, but this time sets priority to `medium` instead of `high`. The SLA urgency reward is forfeited for this step.
+5. The episode ends. The grader scores the trajectory: full credit for classification and routing, partial credit for priority handling, partial credit for SLA urgency, full credit for field extraction. Final score: approximately 0.61.
+
+This illustrates how a single sub-optimal decision reduces the final score without making the episode fail entirely.
 
 ---
 
@@ -422,6 +453,24 @@ The hard task score is lower because it requires tracking topic changes across a
 
 ---
 
+## Testing
+
+The test suite covers all major components:
+
+- **93/93 unit tests passing** (`pytest tests/`)
+- Environment lifecycle: `reset()`, `step()`, termination conditions, SLA breach, repeat-action penalty
+- Reward logic: each reward component is tested independently with fixed inputs
+- Graders: all three task graders are tested against known episode logs and expected scores
+- Deterministic behavior: the same `task_id` and `seed` always produce the same episode
+
+Run the tests locally with:
+
+```bash
+python -m pytest tests/ -v
+```
+
+---
+
 ## Design notes
 
 **Determinism.** Every episode is fully reproducible. Email content, follow-up paths, and ground truth are all stored in `threads.json`. Given the same `task_id` and `seed`, `reset()` always loads the same thread and every call to `step()` with the same sequence of actions produces identical results.
@@ -435,3 +484,5 @@ The hard task score is lower because it requires tracking topic changes across a
 **SLA timers.** The timer counts down by a fixed amount each step regardless of what action the agent takes. This means the agent is penalized for indecision just as much as for wrong decisions — any step wasted is time lost from the SLA window.
 
 **Sessions.** The API stores one `OpenInboxEnv` instance per session in a module-level dict. This is appropriate for a single-worker deployment. If horizontal scaling were needed, the sessions would need to move to an external store, but that is outside the scope of this submission.
+
+**Design philosophy.** The environment prioritizes determinism, interpretability, and evaluation rigor over stochastic realism. Every score is explainable, every episode is reproducible, and every failure has a specific cause traceable back to a single step.
