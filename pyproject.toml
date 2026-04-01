@@ -26,7 +26,7 @@ dev = [
 ]
 
 [project.scripts]
-openinbox-server = "api.main:main"
+openinbox-server = "server.app:main"
 
 [project.urls]
 Homepage = "https://huggingface.co/spaces/susannnnn/OpenInBox"
