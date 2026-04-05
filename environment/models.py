@@ -67,4 +67,11 @@ class RewardBreakdown(BaseModel):
     false_positive_penalty: float = 0.0
     repeat_penalty: float = 0.0
     sla_breach_penalty: float = 0.0
+    # Cascade consequence fields — default 0.0, only non-zero in task_hard
+    cascade_penalty: float = 0.0
+    correction_bonus: float = 0.0
+    # Strategic tradeoff fields — default 0.0, only non-zero in task_hard
+    escalation_tradeoff_bonus: float = 0.0
+    sla_risk_penalty: float = 0.0
     total: float = 0.0
+

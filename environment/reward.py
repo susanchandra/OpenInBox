@@ -16,6 +16,8 @@ Weight table:
   escalation_penalty      -0.15   escalated when not warranted
   repeat_penalty          -0.10   identical action as previous step
   sla_breach_penalty      -0.30   terminal step when SLA breach occurs
+  cascade_penalty         -0.20   wrong routing on a cascade-triggered step (task_hard only)
+  correction_bonus        +0.15   correct routing on a cascade-triggered step (task_hard only)
 
 Note: priority is not scored in task_hard (ground_truth has empty priority string).
 """
@@ -38,6 +40,8 @@ def compute(
     sla_at_risk: bool,
     task_id: str,
     sla_breach: bool = False,
+    cascade_step: bool = False,
+    corrected_cascade: bool = False,
 ) -> RewardBreakdown:
     """
     Compute the reward for one step.
@@ -96,6 +100,13 @@ def compute(
     if sla_breach:
         r.sla_breach_penalty = -0.30
 
+    # Cascade consequence signals — task_hard only
+    if task_id == "task_hard" and cascade_step:
+        if corrected_cascade:
+            r.correction_bonus = 0.15
+        else:
+            r.cascade_penalty = -0.20
+
     components = [
         r.classification_reward,
         r.routing_reward,
@@ -108,6 +119,8 @@ def compute(
         r.false_positive_penalty,
         r.repeat_penalty,
         r.sla_breach_penalty,
+        r.cascade_penalty,
+        r.correction_bonus,
     ]
     r.total = round(max(-1.0, min(1.0, sum(components))), 4)
     return r

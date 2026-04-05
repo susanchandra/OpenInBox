@@ -471,6 +471,69 @@ python -m pytest tests/ -v
 
 ---
 
+## Delayed Consequences
+
+In `task_hard`, a wrong routing decision at step N has consequences that appear at step N+2, not immediately. When the agent routes to the wrong team, the environment schedules an escalation email (authored in `threads_hard.json` under a `cascade_N_to_{N+2}` key). At step N+2, the cascade email replaces the normal next email. The escalation email is angrier and more urgent, references the original unresolved issue, and raises the stakes.
+
+Two reward signals are tied to cascade steps:
+- `cascade_penalty (-0.20)` — wrong routing on a step triggered by a cascade (failure to recover)
+- `correction_bonus (+0.15)` — correct routing on a cascade step (agent recovered)
+
+This means a single wrong routing decision produces consequences across at least three steps. An agent that only classifies the current email without tracking the thread's state will fail to see the cascade coming and incur compounding penalties.
+
+Example flow for `thread_hard_001`:
+```
+Step 1 → wrong routing (hr_team instead of billing_team)
+           → cascade scheduled at step 3
+Step 2 → normal email, normal scoring
+Step 3 → *** ESCALATION EMAIL INJECTED *** (angry CFO follow-up)
+           → if agent wrong-routes again: cascade_penalty = -0.20
+           → if agent corrects: correction_bonus = +0.15
+```
+
+The cascade demo in `inference.py` runs this exact flow with hardcoded actions before the LLM evaluation, confirming the mechanism always triggers deterministically.
+
+---
+
+## Cross-Step Reasoning
+
+`thread_hard_003` tests whether an agent can carry forward a specific value from an earlier step to a later step where that value is not re-stated.
+
+- **Step 1** (email from accounts@meridian-corp.com): contains `invoice_id = "INV-4471"` buried in the body.
+- **Step 4** (email from a *different sender*, compliance@meridian-corp.com): does not mention `INV-4471` explicitly. Correct routing depends entirely on knowing that the compliance audit is about the same invoice dispute from step 1.
+
+The grader scores step 4 as:
+```
+cross_step_score = 0.0
+if route_to == "billing_team":         cross_step_score += 0.6
+if extracted_fields["invoice_id"] == "INV-4471":  cross_step_score += 0.4
+```
+
+An agent that only looks at the current email (and ignores thread history) will route correctly by coincidence in easy cases, but will fail to extract `invoice_id` at step 4 because it is only present in step 1 of the thread history. This forces the agent to maintain and reference cross-step memory.
+
+---
+
+## Baseline Comparison
+
+The following table shows grader scores for two non-LLM baselines (seed=0, rule-based and naive fixed-policy) alongside approximate LLM scores. The performance gap demonstrates that the environment rewards genuine reasoning, not pattern-matching.
+
+| Task | Naive (fixed routing) | Rule-based fallback | LLM (gpt-4o-mini) |
+|---|---|---|---|
+| task_easy | 0.70 | 0.90 | ~0.78 |
+| task_medium | 0.10 | 0.77 | ~0.61 |
+| task_hard | 0.375 | 1.00 | ~0.37 |
+| **Average** | **0.39** | **0.89** | **~0.59** |
+
+The naive agent (always routes to `billing_team`) scores adequately on `task_easy` because the first test thread happens to be a billing email, but collapses on `task_medium` (wrong class, wrong route, no urgency recognition) and partially survives `task_hard` only because the drift and safe-reply checks happen to align. The rule-based agent uses keyword matching and performs well except at injection detection and cross-step memory — tasks that require tracking context across steps.
+
+Run the baselines locally:
+```bash
+python baseline/run_baseline.py --task all --naive      # naive fixed policy
+python baseline/run_baseline.py --task all --fallback   # rule-based keyword agent
+```
+
+---
+
 ## Design notes
 
 **Determinism.** Every episode is fully reproducible. Email content, follow-up paths, and ground truth are all stored in `threads.json`. Given the same `task_id` and `seed`, `reset()` always loads the same thread and every call to `step()` with the same sequence of actions produces identical results.

@@ -3,13 +3,15 @@ Baseline runner for OpenInbox.
 
 Runs one full episode per task and scores it using the deterministic grader.
 The primary baseline uses the OpenAI API. The --fallback flag switches to the
-keyword-based agent, which needs no API key.
+keyword-based agent, which needs no API key. The --naive flag uses the fixed-
+policy agent that always routes to billing_team.
 
 Usage:
     python baseline/run_baseline.py
     python baseline/run_baseline.py --task task_easy --seed 0
     python baseline/run_baseline.py --task all --seed 0
     python baseline/run_baseline.py --task all --fallback
+    python baseline/run_baseline.py --task all --naive
 """
 
 import argparse
@@ -77,10 +79,19 @@ def main():
         action="store_true",
         help="Use rule-based fallback instead of OpenAI API",
     )
+    parser.add_argument(
+        "--naive",
+        action="store_true",
+        help="Use fixed-policy naive agent (always billing_team, no reasoning)",
+    )
     args = parser.parse_args()
 
     # Load agent
-    if args.fallback:
+    if args.naive:
+        from baseline.naive_agent import NaiveAgent
+        agent = NaiveAgent()
+        agent_label = "naive (fixed: billing/medium/billing_team)"
+    elif args.fallback:
         from baseline.rule_agent import RuleAgent
         agent = RuleAgent()
         agent_label = "rule-based fallback"
@@ -145,7 +156,12 @@ def main():
     # Save results to baseline/results/
     results_dir = Path(__file__).parent / "results"
     results_dir.mkdir(exist_ok=True)
-    suffix = "fallback" if args.fallback else "openai"
+    if args.naive:
+        suffix = "naive"
+    elif args.fallback:
+        suffix = "fallback"
+    else:
+        suffix = "openai"
     out_path = results_dir / f"scores_{suffix}_seed{args.seed}.json"
     out_path.write_text(json.dumps(results, indent=2), encoding="utf-8")
     print(f"\nResults saved to {out_path.relative_to(PROJECT_ROOT)}")

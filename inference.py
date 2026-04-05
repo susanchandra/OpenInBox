@@ -10,6 +10,13 @@ This script runs one full episode per task using an LLM agent that calls
 the provided endpoint, scores each episode with the deterministic grader,
 prints a summary table, and writes all scores to inference_results.json.
 
+Additionally, a deterministic CASCADE TRIGGER DEMO is run before the main
+evaluation. This demo uses hardcoded actions (no LLM) and always triggers
+the cascade mechanism in task_hard, demonstrating that:
+  - An incorrect routing at step 1 schedules an escalation at step 3
+  - The cascade email is injected deterministically at step 3
+  - The environment correctly penalizes the failure to correct
+
 Expected runtime: under 5 minutes for 3 tasks on gpt-4o-mini or equivalent.
 Resource requirements: 2 vCPU, 8 GB RAM (no local model loading).
 """
@@ -186,7 +193,108 @@ def _run_task(task_id: str, client: OpenAI) -> dict:
     return result
 
 
+# ---------------------------------------------------------------------------
+# [DEMO: CASCADE TRIGGER] — Deterministic, no LLM needed
+# ---------------------------------------------------------------------------
+
+def _run_cascade_demo() -> None:
+    """
+    Demonstrate the cascade consequence mechanism using hardcoded actions.
+
+    Episode: task_hard, thread_hard_001, seed=0
+      Step 0 → correct (billing_team)  — no cascade scheduled
+      Step 1 → WRONG  (hr_team)        — cascade scheduled at step 3
+      Step 2 → correct (legal_team)    — normal step
+      Step 3 → cascade email appears   — env injects escalation email
+
+    This demo always runs identically (no LLM, no randomness).
+    The cascade email at step 3 is authored in threads_hard.json under
+    the key "cascade_1_to_3".
+    """
+    print("=" * 60)
+    print("[DEMO: CASCADE TRIGGER] — deterministic, no LLM")
+    print("=" * 60)
+    print("Thread: thread_hard_001 | Task: task_hard | Seed: 0")
+    print()
+
+    env = OpenInboxEnv()
+    obs = env.reset("task_hard", seed=0)
+
+    # Hardcoded action sequence: triggers cascade at step 1 (wrong route)
+    hardcoded_actions = [
+        Action(
+            classification="billing", priority="medium",
+            route_to="billing_team",  # CORRECT
+            extracted_fields={}, escalate=False, flag_injection=False,
+        ),
+        Action(
+            classification="billing", priority="medium",
+            route_to="hr_team",       # WRONG — schedules cascade at step 3
+            extracted_fields={}, escalate=False, flag_injection=False,
+        ),
+        Action(
+            classification="legal", priority="high",
+            route_to="legal_team",    # CORRECT
+            extracted_fields={}, escalate=False, flag_injection=True,
+        ),
+        # Step 3: cascade email replaces normal email
+        Action(
+            classification="billing", priority="high",
+            route_to="billing_team",  # Wrong on cascade step (should be legal_team)
+            extracted_fields={}, escalate=False, flag_injection=False,
+        ),
+        Action(
+            classification="legal", priority="critical",
+            route_to="legal_team",    # CORRECT
+            extracted_fields={}, escalate=True, flag_injection=False,
+        ),
+    ]
+
+    step_num = 0
+    while not env.done and step_num < len(hardcoded_actions):
+        email = obs.current_email
+        action = hardcoded_actions[step_num]
+
+        print(f"Step {step_num + 1}:")
+        print(f"  From   : {email.sender}")
+        print(f"  Subject: {email.subject[:70]}")
+
+        # Was this step injected by cascade?
+        is_cascade = step_num in env._cascade_steps
+        if is_cascade:
+            print(f"  *** CASCADE EMAIL INJECTED *** (wrong routing at step 1 caused this)")
+
+        print(f"  Action : route_to={action.route_to}, escalate={action.escalate}")
+
+        obs, reward, done, info = env.step(action)
+        rb = info["reward_breakdown"]
+        cascade_note = ""
+        if rb.get("cascade_penalty", 0) != 0:
+            cascade_note = f" [cascade_penalty={rb['cascade_penalty']}]"
+        if rb.get("correction_bonus", 0) != 0:
+            cascade_note = f" [correction_bonus={rb['correction_bonus']}]"
+        print(f"  Reward : {reward:.4f}{cascade_note}")
+        print()
+
+        step_num += 1
+        if done:
+            break
+
+    state = env.state()
+    print(f"Cascade steps triggered: {state['cascade_steps_triggered']}")
+    print(f"Episode log steps      : {state['step_count']}")
+    print("=" * 60)
+    print()
+
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+
 def main():
+    # Always run the cascade demo first (no LLM required)
+    _run_cascade_demo()
+
     print("OpenInbox — inference script")
     print(f"  API_BASE_URL : {API_BASE_URL}")
     print(f"  MODEL_NAME   : {MODEL_NAME}")

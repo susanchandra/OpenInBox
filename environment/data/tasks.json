@@ -14,7 +14,7 @@
     "sla_at_risk_threshold": 4.0
   },
   "task_hard": {
-    "thread_ids": ["thread_hard_001", "thread_hard_002"],
+    "thread_ids": ["thread_hard_001", "thread_hard_002", "thread_hard_003"],
     "max_steps": 20,
     "sla_start": 12.0,
     "sla_decrement": 1.5,
