@@ -16,6 +16,13 @@ For task_hard, threads have multiple emails. The env advances through them in
 order by step count. Follow-up team responses are added to thread_history as
 internal acknowledgments, but the next current_email comes from the thread's
 emails array.
+
+Cascade consequence chain (task_hard only):
+  If the agent wrong-routes at step N and the thread has a
+  "cascade_{N}_to_{N+2}" follow-up authored, the environment schedules an
+  escalation email to appear at step N+2. That step is marked in
+  _cascade_steps so reward.py receives cascade_step=True and can apply
+  cascade_penalty / correction_bonus.
 """
 
 import json
@@ -61,6 +68,18 @@ class OpenInboxEnv:
         self.done: bool = False
         self.env_injection_flags: dict = {}
 
+        # Cascade consequence state — only used in task_hard.
+        # _cascade_queue: step_index -> EmailMessage to inject at that step
+        # _cascade_steps: set of step indices at which a cascade was triggered
+        self._cascade_queue: dict[int, EmailMessage] = {}
+        self._cascade_steps: set[int] = set()
+
+        # Strategic tradeoff state — only used in task_hard
+        # context_locked: agent chose to escalate; thread_history is hidden hereafter
+        # tradeoff_risk: agent chose not to escalate at step 2; wrong routing = -0.40
+        self.context_locked: bool = False
+        self.tradeoff_risk: bool = False
+
     # ------------------------------------------------------------------
     # Public interface
     # ------------------------------------------------------------------
@@ -93,6 +112,14 @@ class OpenInboxEnv:
         self.prev_action = None
         self.episode_log = []
         self.env_injection_flags = {}
+
+        # Reset cascade state
+        self._cascade_queue = {}
+        self._cascade_steps = set()
+
+        # Reset tradeoff state
+        self.context_locked = False
+        self.tradeoff_risk = False
 
         # One ticket per episode, keyed by thread_id
         self.open_tickets = 1
@@ -131,13 +158,14 @@ class OpenInboxEnv:
           2.  Tick SLA timers
           3.  Check SLA breach — early return if breached
           4.  Update ticket status and team queues
+          4b. Schedule cascade if wrong routing on task_hard
           5.  Load pre-authored follow-up email
           6.  Determine next current_email (thread advance or followup)
           7.  Resolve ticket if follow-up is a confirmation
           8.  Run injection detector on current email (informational)
-          9.  Compute reward
+          9.  Compute reward (includes cascade signals)
           10. Append to episode log
-          11. Swap to new current email
+          11. Advance current_email — honour cascade queue first
           12. Store prev_action
           13. Increment step_count
           14. Check remaining termination conditions
@@ -150,8 +178,10 @@ class OpenInboxEnv:
             )
 
         # Capture the step index before we change anything.
-        # Used to index into task_hard's list-type ground truth and followup keys.
         step_idx = self.step_count
+
+        # Determine whether this step was triggered by a cascade event
+        is_cascade_step = step_idx in self._cascade_steps
 
         # Save the previous action for the repeat-penalty check
         prev = self.prev_action
@@ -189,6 +219,8 @@ class OpenInboxEnv:
                 sla_at_risk=self._sla_at_risk(),
                 task_id=self.task_id,
                 sla_breach=True,
+                cascade_step=is_cascade_step,
+                corrected_cascade=False,
             )
             self._append_log(action, breakdown, step_idx)
             return (
@@ -217,7 +249,6 @@ class OpenInboxEnv:
         if followup_raw.get("is_confirmation", False):
             self.ticket_status = "resolved"
             self.open_tickets = 0
-            # Remove one item from the team's queue
             if (
                 action.route_to in self.team_queues
                 and self.team_queues[action.route_to] > 0
@@ -231,6 +262,32 @@ class OpenInboxEnv:
         # 9. Compute reward for this step (uses the email the agent processed,
         # not the new one)
         gt = self._resolve_step_ground_truth(step_idx)
+
+        # 4b. Cascade scheduling — task_hard only.
+        # If the agent routed wrong at step N and the thread has authored a
+        # cascade_{N}_to_{N+2} follow-up, schedule the escalation email for
+        # step N+2. This happens after normal followup lookup so it does not
+        # affect the current step's email chain.
+        if self.task_id == "task_hard" and gt.get("route_to"):
+            if action.route_to != gt["route_to"]:
+                cascade_step_target = step_idx + 2
+                cascade_key = f"cascade_{step_idx}_to_{cascade_step_target}"
+                followups = self.thread.get("followups", {})
+                if (
+                    cascade_key in followups
+                    and cascade_step_target not in self._cascade_queue
+                ):
+                    self._cascade_queue[cascade_step_target] = EmailMessage(
+                        **followups[cascade_key]
+                    )
+                    self._cascade_steps.add(cascade_step_target)
+
+        # Cascade correction signal — was this a cascade step, and did the agent
+        # route correctly on it?
+        corrected_cascade = False
+        if is_cascade_step and gt.get("route_to"):
+            corrected_cascade = (action.route_to == gt["route_to"])
+
         breakdown = reward_module.compute(
             action=action,
             prev_action=prev,
@@ -239,13 +296,49 @@ class OpenInboxEnv:
             sla_at_risk=self._sla_at_risk(),
             task_id=self.task_id,
             sla_breach=False,
+            cascade_step=is_cascade_step,
+            corrected_cascade=corrected_cascade,
         )
+
+        # Strategic tradeoff logic (task_hard only, fires from step 2 onward)
+        _TRADEOFF_STEP = 2
+        if self.task_id == "task_hard":
+            if not self.context_locked and action.escalate and step_idx >= _TRADEOFF_STEP:
+                # OPTION A: agent chose to escalate — immediate bonus, locks context
+                self.context_locked = True
+                breakdown.escalation_tradeoff_bonus = 0.30
+                breakdown.total = round(
+                    max(-1.0, min(1.0, breakdown.total + 0.30)), 4
+                )
+            elif (
+                not self.context_locked
+                and not self.tradeoff_risk
+                and not action.escalate
+                and step_idx == _TRADEOFF_STEP
+            ):
+                # OPTION B: agent chose not to escalate at the tradeoff step
+                self.tradeoff_risk = True
+
+            # Apply SLA-risk penalty for wrong routing under tradeoff_risk
+            if self.tradeoff_risk and step_idx > _TRADEOFF_STEP and gt.get("route_to"):
+                if action.route_to != gt["route_to"]:
+                    breakdown.sla_risk_penalty = -0.40
+                    breakdown.total = round(
+                        max(-1.0, min(1.0, breakdown.total - 0.40)), 4
+                    )
 
         # 10. Record this step
         self._append_log(action, breakdown, step_idx)
 
-        # 11. Advance to the new email
-        self.current_email = new_email
+        # 11. Advance to the new email — honour cascade queue first
+        next_step_idx = step_idx + 1
+        if self.task_id == "task_hard" and next_step_idx in self._cascade_queue:
+            # Cascade email replaces the normal next email.
+            # Append the normal next email to history so context is preserved.
+            self.thread_history.append(new_email)
+            self.current_email = self._cascade_queue.pop(next_step_idx)
+        else:
+            self.current_email = new_email
 
         # 12. Store action for next step's repeat check
         self.prev_action = action
@@ -287,6 +380,9 @@ class OpenInboxEnv:
             "done": self.done,
             "env_injection_flags": self.env_injection_flags,
             "episode_log": self.episode_log,
+            "cascade_steps_triggered": sorted(self._cascade_steps),
+            "context_locked": self.context_locked,
+            "tradeoff_risk": self.tradeoff_risk,
         }
 
     # ------------------------------------------------------------------
@@ -294,9 +390,12 @@ class OpenInboxEnv:
     # ------------------------------------------------------------------
 
     def _build_observation(self) -> Observation:
+        # When context is locked the agent can no longer see thread history.
+        # This is the consequence of choosing Option A (escalate for safety).
+        visible_history = [] if self.context_locked else list(self.thread_history)
         return Observation(
             current_email=self.current_email,
-            thread_history=list(self.thread_history),
+            thread_history=visible_history,
             open_tickets=self.open_tickets,
             team_queues=dict(self.team_queues),
             sla_timers=dict(self.sla_timers),
@@ -307,6 +406,8 @@ class OpenInboxEnv:
                 "sla_at_risk": self._sla_at_risk(),
                 # has_injection reflects the NEW current_email (already swapped)
                 "injection_in_current_email": self.current_email.has_injection,
+                "context_locked": self.context_locked,
+                "tradeoff_risk": self.tradeoff_risk,
             },
         )
 
@@ -362,6 +463,9 @@ class OpenInboxEnv:
         are exhausted:
           - Add the current email to history
           - The team's follow-up becomes the next current_email
+
+        Note: cascade injection is handled in step() after this call returns,
+        by checking _cascade_queue at step N+1.
         """
         # Current email is now part of history
         self.thread_history.append(self.current_email)
@@ -411,6 +515,7 @@ class OpenInboxEnv:
                 "thread_id": self.thread_id,
                 "action": action.model_dump(),
                 "reward_breakdown": breakdown.model_dump(),
+                "cascade_triggered": step_idx in self._cascade_steps,
             }
         )
 
