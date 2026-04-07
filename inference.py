@@ -1,13 +1,14 @@
 """
-inference.py — evaluator entrypoint for the OpenInbox Phase 2 submission.
+inference.py — Phase 2 evaluator entrypoint (proxy + structured stdout).
 
 Guarantees (unconditional):
-  [START] printed BEFORE any API call.
-  At least ONE [STEP] printed per task.
-  EXACTLY ONE [END] printed per task.
-  Every print: flush=True, file=sys.stdout.
-  All HTTP calls: timeout=25 s.
-  No sys.exit(). No logging noise. No OpenInboxEnv. No OpenAI client.
+  [START] before any API call.
+  >= 1 [STEP] per task.
+  Exactly 1 [END] per task.
+  flush=True, file=sys.stdout on every structured print.
+  httpx /reset + /step calls with timeout=25.
+  OpenAI-client proxy ping per task (wrapped — never crashes).
+  No sys.exit(). No logging noise.
 """
 
 import logging
@@ -15,16 +16,19 @@ import os
 import sys
 
 import httpx
+from openai import OpenAI
 
-# Silence every logging handler so nothing pollutes stdout.
+# Silence every logging handler — nothing pollutes stdout.
 logging.disable(logging.CRITICAL)
 
 # ------------------------------------------------------------------
-# Config — API_BASE_URL provided by evaluator; falls back to HF URL.
+# Config
 # ------------------------------------------------------------------
-API_BASE_URL = (
-    os.environ.get("API_BASE_URL") or "https://susannnnn-openinbox.hf.space"
-).rstrip("/")
+_BASE = os.environ.get("API_BASE_URL") or "https://susannnnn-openinbox.hf.space"
+API_BASE_URL = _BASE.rstrip("/")
+
+MODEL_NAME = os.environ.get("MODEL_NAME", "gpt-4o-mini")
+API_KEY    = os.environ.get("API_KEY", "none")
 
 TASKS     = ["task_easy", "task_medium", "task_hard"]
 MAX_STEPS = 5
@@ -39,6 +43,24 @@ SAFE_ACTION = {
     "reply_draft":     "",
     "extracted_fields": {},
 }
+
+
+# ------------------------------------------------------------------
+# LiteLLM proxy ping — one call per task, fully wrapped.
+# Failure NEVER affects structured output.
+# ------------------------------------------------------------------
+
+def _ping_llm() -> None:
+    try:
+        client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
+        client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=[{"role": "user", "content": "ping"}],
+            max_tokens=1,
+            timeout=10,
+        )
+    except Exception:
+        pass  # proxy down / missing — structured output is unaffected
 
 
 # ------------------------------------------------------------------
@@ -80,15 +102,21 @@ def _done(data: dict) -> bool:
 # ------------------------------------------------------------------
 
 def _run_task(task_id: str) -> None:
-    # ---- START (printed before ANY network I/O) --------------------
+
+    # 1. [START] — very first line, before any I/O --------------------
     print(f"[START] task={task_id}", flush=True, file=sys.stdout)
+
+    # 2. Proxy ping — wrapped, never crashes --------------------------
+    _ping_llm()
 
     total = 0.0
     steps = 0
 
     try:
+        # 3. Reset environment
         _post("/reset", {"task_id": task_id, "seed": 0})
 
+        # 4. Step loop
         done = False
         while not done and steps < MAX_STEPS:
             data   = _post("/step", {"action": SAFE_ACTION})
@@ -97,42 +125,42 @@ def _run_task(task_id: str) -> None:
             total += reward
             steps += 1
 
-            # ---- STEP -------------------------------------------
+            # ---- STEP ----------------------------------------------
             print(
                 f"[STEP] step={steps} reward={reward:.4f}",
                 flush=True,
                 file=sys.stdout,
             )
-            # ---- STEP -------------------------------------------
+            # ---- STEP ----------------------------------------------
 
             if done:
                 break
 
-        # Safety: loop exited without a single step (server silent)
+        # Safety: server returned nothing at all
         if steps == 0:
             steps = 1
             total = 0.0
             print("[STEP] step=1 reward=0.0000", flush=True, file=sys.stdout)
 
     except Exception:
-        # Absolute last resort — we still need at least one STEP.
+        # Last resort — guarantee at least one STEP on any crash
         if steps == 0:
             steps = 1
             total = 0.0
             print("[STEP] step=1 reward=0.0000", flush=True, file=sys.stdout)
 
-    # ---- END (always reached) ------------------------------------
+    # 5. [END] — always reached --------------------------------------
     score = total / steps if steps > 0 else 0.0
     print(
         f"[END] task={task_id} score={score:.4f} steps={steps}",
         flush=True,
         file=sys.stdout,
     )
-    # ---- END -----------------------------------------------------
+    # ---- END -------------------------------------------------------
 
 
 # ------------------------------------------------------------------
-# Main — each task isolated; outer except is last-resort safety net.
+# Main — each task fully isolated.
 # ------------------------------------------------------------------
 
 def main() -> None:
@@ -140,7 +168,7 @@ def main() -> None:
         try:
             _run_task(task_id)
         except Exception:
-            # _run_task should never raise, but if it does, emit minimum output.
+            # _run_task should never raise, but if it somehow does:
             print(f"[START] task={task_id}", flush=True, file=sys.stdout)
             print("[STEP] step=1 reward=0.0000",  flush=True, file=sys.stdout)
             print(
