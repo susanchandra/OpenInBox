@@ -172,12 +172,17 @@ def _act(client: OpenAI, obs: Observation) -> Action:
 
 def _run_task(task_id: str, client: OpenAI) -> dict:
     """Run one full episode for the given task and return the grader result."""
+    print(f"[START] task={task_id}", flush=True)
+
     env = OpenInboxEnv()
     obs = env.reset(task_id, seed=SEED)
 
+    step_number = 0
     while not env.done:
         action = _act(client, obs)
-        obs, _, done, _ = env.step(action)
+        obs, reward, done, _ = env.step(action)
+        step_number += 1
+        print(f"[STEP] step={step_number} reward={float(reward)}", flush=True)
         if done:
             break
 
@@ -190,6 +195,8 @@ def _run_task(task_id: str, client: OpenAI) -> dict:
     result["steps_taken"] = state["step_count"]
     result["thread_id"] = thread_id
     result["task_id"] = task_id
+
+    print(f"[END] task={task_id} score={result['score']} steps={result['steps_taken']}", flush=True)
     return result
 
 
