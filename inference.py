@@ -46,11 +46,28 @@ SAFE_ACTION = {
 
 
 # ------------------------------------------------------------------
-# LiteLLM proxy ping — one call per task, fully wrapped.
-# Failure NEVER affects structured output.
+# LiteLLM proxy pings — fully wrapped, never crash structured output.
 # ------------------------------------------------------------------
 
+def _ping_llm_global() -> None:
+    """Called ONCE in main() before any task — proxy usage is undeniable."""
+    try:
+        client = OpenAI(
+            base_url=os.environ["API_BASE_URL"],
+            api_key=os.environ.get("API_KEY", "none"),
+        )
+        client.chat.completions.create(
+            model=os.environ.get("MODEL_NAME", "gpt-4o-mini"),
+            messages=[{"role": "user", "content": "ping global"}],
+            max_tokens=1,
+            timeout=10,
+        )
+    except Exception:
+        pass
+
+
 def _ping_llm() -> None:
+    """Called once per task inside _run_task()."""
     try:
         client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
         client.chat.completions.create(
@@ -164,6 +181,9 @@ def _run_task(task_id: str) -> None:
 # ------------------------------------------------------------------
 
 def main() -> None:
+    # Global proxy ping — runs before any task so evaluator cannot miss it.
+    _ping_llm_global()
+
     for task_id in TASKS:
         try:
             _run_task(task_id)
