@@ -1,6 +1,5 @@
 ---
 title: OpenInBox
-emoji: 🤖
 colorFrom: blue
 colorTo: green
 sdk: docker
