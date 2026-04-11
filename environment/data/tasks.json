@@ -1,20 +1,20 @@
 {
   "task_easy": {
-    "thread_ids": ["thread_easy_001", "thread_easy_002"],
+    "thread_ids": ["thread_easy_001", "thread_easy_002", "thread_easy_003"],
     "max_steps": 5,
     "sla_start": null,
     "sla_decrement": null,
     "sla_at_risk_threshold": null
   },
   "task_medium": {
-    "thread_ids": ["thread_medium_001", "thread_medium_002"],
+    "thread_ids": ["thread_medium_001", "thread_medium_002", "thread_medium_003", "thread_medium_004"],
     "max_steps": 10,
     "sla_start": 8.0,
     "sla_decrement": 2.0,
     "sla_at_risk_threshold": 4.0
   },
   "task_hard": {
-    "thread_ids": ["thread_hard_001", "thread_hard_002", "thread_hard_003"],
+    "thread_ids": ["thread_hard_001", "thread_hard_002", "thread_hard_003", "thread_hard_004"],
     "max_steps": 20,
     "sla_start": 12.0,
     "sla_decrement": 1.5,

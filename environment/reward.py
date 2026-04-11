@@ -135,7 +135,8 @@ def token_f1(predicted: dict[str, str], ground: dict[str, str]) -> float:
     Fields the agent left empty count as zero recall.
     """
     if not ground:
-        return 0.0
+        # No fields to extract — agent correctly extracted nothing → full score.
+        return 1.0 if not predicted else 0.0
 
     scores = []
     for field, gt_value in ground.items():

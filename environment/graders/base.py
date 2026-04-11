@@ -23,7 +23,9 @@ def token_f1(predicted: dict[str, str], ground: dict[str, str]) -> float:
     Returns 0.0 if ground truth has no fields.
     """
     if not ground:
-        return 0.0
+        # No fields to extract — agent correctly extracted nothing → perfect score.
+        # If agent hallucinated fields when none were expected, still 0.0.
+        return 1.0 if not predicted else 0.0
 
     scores = []
     for field, gt_value in ground.items():
