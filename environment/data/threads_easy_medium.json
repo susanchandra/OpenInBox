@@ -378,5 +378,288 @@
       },
       "requires_escalation": false
     }
+  },
+
+  "thread_easy_003": {
+    "task": "task_easy",
+    "emails": [
+      {
+        "id": "e005_msg0",
+        "thread_id": "thread_easy_003",
+        "sender": "no-reply@promo-deals-247.net",
+        "subject": "🎉 Congratulations! You've won a $500 Amazon Gift Card — Claim Now!",
+        "body": "Dear Valued Customer,\n\nYou have been selected as today's lucky winner of a $500 Amazon Gift Card!\n\nClick the link below within 24 hours to claim your prize. This offer is exclusively for you and expires soon.\n\nClaim here: http://suspicious-promo-link.net/claim?id=92847\n\nIf you did not sign up for our promotions, click here to unsubscribe.\n\nBest regards,\nPromo Deals Team",
+        "timestamp": "2024-03-15T12:00:00Z",
+        "has_injection": false,
+        "step_index": 0
+      }
+    ],
+    "followups": {
+      "billing_team": {
+        "id": "e005_f_billing",
+        "thread_id": "thread_easy_003",
+        "sender": "billing@internal.company.com",
+        "subject": "Re: Congratulations! You've won...",
+        "body": "This does not appear to be a billing matter. The message looks like spam — please route to the spam filter.",
+        "timestamp": "2024-03-15T12:05:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      },
+      "tech_team": {
+        "id": "e005_f_tech",
+        "thread_id": "thread_easy_003",
+        "sender": "techsupport@internal.company.com",
+        "subject": "Re: Congratulations! You've won...",
+        "body": "This is not a technical support issue. It appears to be spam. Please route to the spam filter.",
+        "timestamp": "2024-03-15T12:05:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      },
+      "hr_team": {
+        "id": "e005_f_hr",
+        "thread_id": "thread_easy_003",
+        "sender": "hr@internal.company.com",
+        "subject": "Re: Congratulations! You've won...",
+        "body": "This is not an HR matter. Looks like promotional spam — route to the spam filter.",
+        "timestamp": "2024-03-15T12:05:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      },
+      "legal_team": {
+        "id": "e005_f_legal",
+        "thread_id": "thread_easy_003",
+        "sender": "legal@internal.company.com",
+        "subject": "Re: Congratulations! You've won...",
+        "body": "This is a spam/phishing email, not a legal matter. Route to the spam filter.",
+        "timestamp": "2024-03-15T12:05:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      },
+      "spam_filter": {
+        "id": "e005_f_spam",
+        "thread_id": "thread_easy_003",
+        "sender": "noreply@internal.company.com",
+        "subject": "Re: Congratulations! You've won...",
+        "body": "This message has been identified as spam and moved to the spam queue. The sender domain has been flagged for review. No further action required.",
+        "timestamp": "2024-03-15T12:05:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": true
+      },
+      "unknown": {
+        "id": "e005_f_unknown",
+        "thread_id": "thread_easy_003",
+        "sender": "noreply@internal.company.com",
+        "subject": "Re: Congratulations! You've won...",
+        "body": "This message could not be routed. No matching team was found.",
+        "timestamp": "2024-03-15T12:05:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      }
+    },
+    "ground_truth": {
+      "classification": "spam",
+      "priority": "low",
+      "route_to": "spam_filter",
+      "extracted_fields": {},
+      "requires_escalation": false
+    }
+  },
+
+  "thread_medium_003": {
+    "task": "task_medium",
+    "emails": [
+      {
+        "id": "e006_msg0",
+        "thread_id": "thread_medium_003",
+        "sender": "j.okafor@company.com",
+        "subject": "URGENT: Formal workplace harassment complaint — immediate HR response required",
+        "body": "Dear HR Department,\n\nI am writing to formally report a serious workplace harassment incident that occurred on March 14, 2024. My direct manager, David Park (Employee ID: EMP-2091), made repeated discriminatory remarks during our team meeting (Incident ID: HR-2024-0314-01).\n\nI have documented the incident with witnesses present. Given the severity and pattern of behaviour, I am requesting an immediate formal investigation under company policy HR-POL-003.\n\nThis matter requires urgent escalation given the ongoing nature of the conduct and the hostile work environment it has created.\n\nThis complaint must be acknowledged within 24 hours per our employee handbook.\n\nRespectfully,\nJames Okafor\nSenior Analyst — Data Platform\nEmployee ID: EMP-4452",
+        "timestamp": "2024-03-15T09:00:00Z",
+        "has_injection": false,
+        "step_index": 0
+      }
+    ],
+    "followups": {
+      "billing_team": {
+        "id": "e006_f_billing",
+        "thread_id": "thread_medium_003",
+        "sender": "billing@internal.company.com",
+        "subject": "Re: URGENT: Formal workplace harassment complaint",
+        "body": "This is an HR matter, not a billing issue. Please route this urgently to the HR department.",
+        "timestamp": "2024-03-15T09:30:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      },
+      "tech_team": {
+        "id": "e006_f_tech",
+        "thread_id": "thread_medium_003",
+        "sender": "techsupport@internal.company.com",
+        "subject": "Re: URGENT: Formal workplace harassment complaint",
+        "body": "This is an HR matter. Tech support cannot assist with workplace complaints. Please route to HR immediately.",
+        "timestamp": "2024-03-15T09:30:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      },
+      "hr_team": {
+        "id": "e006_f_hr",
+        "thread_id": "thread_medium_003",
+        "sender": "hr@internal.company.com",
+        "subject": "Re: URGENT: Formal workplace harassment complaint — acknowledged",
+        "body": "Dear James,\n\nWe have received your formal harassment complaint (Incident ID: HR-2024-0314-01) against EMP-2091. A dedicated HR investigator has been assigned. You will be contacted within 24 hours to schedule an initial interview.\n\nYour complaint has been escalated to the HR Director as per policy HR-POL-003.\n\nHR Department",
+        "timestamp": "2024-03-15T09:30:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": true
+      },
+      "legal_team": {
+        "id": "e006_f_legal",
+        "thread_id": "thread_medium_003",
+        "sender": "legal@internal.company.com",
+        "subject": "Re: URGENT: Formal workplace harassment complaint",
+        "body": "This workplace complaint should be initially handled by HR per company policy. Please route to HR immediately. Legal will be involved if the investigation warrants it.",
+        "timestamp": "2024-03-15T09:30:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      },
+      "spam_filter": {
+        "id": "e006_f_spam",
+        "thread_id": "thread_medium_003",
+        "sender": "noreply@internal.company.com",
+        "subject": "Re: URGENT: Formal workplace harassment complaint",
+        "body": "This message was flagged and moved to the spam queue. No action was taken.",
+        "timestamp": "2024-03-15T09:30:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      },
+      "unknown": {
+        "id": "e006_f_unknown",
+        "thread_id": "thread_medium_003",
+        "sender": "noreply@internal.company.com",
+        "subject": "Re: URGENT: Formal workplace harassment complaint",
+        "body": "This message could not be routed. No matching team was found.",
+        "timestamp": "2024-03-15T09:30:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      }
+    },
+    "ground_truth": {
+      "classification": "hr",
+      "priority": "high",
+      "route_to": "hr_team",
+      "extracted_fields": {
+        "incident_id": "HR-2024-0314-01",
+        "employee_id": "EMP-4452",
+        "manager_id": "EMP-2091",
+        "policy_ref": "HR-POL-003"
+      },
+      "requires_escalation": false
+    }
+  },
+
+  "thread_medium_004": {
+    "task": "task_medium",
+    "emails": [
+      {
+        "id": "e007_msg0",
+        "thread_id": "thread_medium_004",
+        "sender": "monitoring@ops.internal",
+        "subject": "CRITICAL: Authentication service down — all user logins failing",
+        "body": "Incident INC-20240315-007 opened at 07:45 UTC.\n\nThe centralised authentication service (auth-prod-cluster-02) is completely unresponsive. All user login attempts across all products are failing with HTTP 503 errors.\n\nApproximately 12,000 active users are affected. Customer support is receiving a surge of reports (300+ tickets in the last 10 minutes).\n\nThe on-call engineer (Sarah Liu) has been paged but has not yet acknowledged after 8 minutes.\n\nThis requires immediate escalation to the platform engineering team and senior management notification.\n\nIncident ID: INC-20240315-007\nAffected system: auth-prod-cluster-02\nSeverity: P0\nStart time: 2024-03-15T07:45:00Z\nUsers affected: ~12,000",
+        "timestamp": "2024-03-15T07:45:00Z",
+        "has_injection": false,
+        "step_index": 0
+      }
+    ],
+    "followups": {
+      "billing_team": {
+        "id": "e007_f_billing",
+        "thread_id": "thread_medium_004",
+        "sender": "billing@internal.company.com",
+        "subject": "Re: CRITICAL: Authentication service down",
+        "body": "This is a critical technical incident, not a billing issue. Route to the engineering team immediately.",
+        "timestamp": "2024-03-15T07:50:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      },
+      "tech_team": {
+        "id": "e007_f_tech",
+        "thread_id": "thread_medium_004",
+        "sender": "oncall@engineering.internal",
+        "subject": "Re: CRITICAL: Authentication service down — acknowledged",
+        "body": "Acknowledged. Platform engineering team is responding to INC-20240315-007. Auth cluster auth-prod-cluster-02 is being investigated. Bridge call started. Estimated status update in 10 minutes.\n\nOn-Call Platform Engineering",
+        "timestamp": "2024-03-15T07:50:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": true
+      },
+      "hr_team": {
+        "id": "e007_f_hr",
+        "thread_id": "thread_medium_004",
+        "sender": "hr@internal.company.com",
+        "subject": "Re: CRITICAL: Authentication service down",
+        "body": "This is a technical incident — HR cannot assist. Route to engineering immediately.",
+        "timestamp": "2024-03-15T07:50:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      },
+      "legal_team": {
+        "id": "e007_f_legal",
+        "thread_id": "thread_medium_004",
+        "sender": "legal@internal.company.com",
+        "subject": "Re: CRITICAL: Authentication service down",
+        "body": "This is a technical incident. Route to engineering immediately. Legal may need to be involved for breach notification later.",
+        "timestamp": "2024-03-15T07:50:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      },
+      "spam_filter": {
+        "id": "e007_f_spam",
+        "thread_id": "thread_medium_004",
+        "sender": "noreply@internal.company.com",
+        "subject": "Re: CRITICAL: Authentication service down",
+        "body": "This message was moved to the spam queue. No action taken.",
+        "timestamp": "2024-03-15T07:50:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      },
+      "unknown": {
+        "id": "e007_f_unknown",
+        "thread_id": "thread_medium_004",
+        "sender": "noreply@internal.company.com",
+        "subject": "Re: CRITICAL: Authentication service down",
+        "body": "This message could not be routed. No matching team was found.",
+        "timestamp": "2024-03-15T07:50:00Z",
+        "has_injection": false,
+        "step_index": 1,
+        "is_confirmation": false
+      }
+    },
+    "ground_truth": {
+      "classification": "technical",
+      "priority": "critical",
+      "route_to": "tech_team",
+      "extracted_fields": {
+        "incident_id": "INC-20240315-007",
+        "affected_system": "auth-prod-cluster-02",
+        "severity": "P0",
+        "users_affected": "12000"
+      },
+      "requires_escalation": false
+    }
   }
 }

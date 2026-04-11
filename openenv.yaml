@@ -1,3 +1,9 @@
+spec_version: 1
+type: space
+runtime: fastapi
+app: api.app:app
+port: 7860
+
 name: openinbox
 version: "1.0.0"
 description: >
