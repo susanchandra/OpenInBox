@@ -1,15 +1,24 @@
 """
-inference.py — Phase 2 evaluator entrypoint (proxy + structured stdout).
+inference.py -- Phase 2 evaluator entrypoint (proxy + structured stdout).
 
-Key guarantees:
+ARCHITECTURE (two completely separate URL configs):
+
+  LLM proxy  --> os.environ["API_BASE_URL"]   (injected by OpenEnv evaluator)
+                  Used ONLY for OpenAI client.  All LLM decisions go here.
+
+  Env server --> ENV_SERVER_URL               (our deployed HF Space, hardcoded)
+                  Used ONLY for /reset /step /grader.  Never reads API_BASE_URL.
+
+This keeps the two services separate so the evaluator injecting their proxy URL
+as API_BASE_URL does NOT interfere with our environment API calls.
+
+Guarantees:
   [START] before any API call.
   >= 1 [STEP] per task.
   Exactly 1 [END] per task.
   flush=True, file=sys.stdout on every structured print.
-  session_id tracked from /reset and passed to every /step call.
-  episode_log built locally and sent to /grader for real score.
-  All scores clamped strictly to (0.001, 0.999) — never 0.0 or 1.0.
-  LLM proxy used for ACTUAL decision-making on every step (not just a ping).
+  LLM proxy called at startup AND on every step decision.
+  All scores clamped strictly to (0.001, 0.999).
   No sys.exit(). No logging noise.
 """
 
@@ -25,13 +34,24 @@ from openai import OpenAI
 logging.disable(logging.CRITICAL)
 
 # ------------------------------------------------------------------
-# Config
+# Config -- TWO separate URL configs, never mix them
 # ------------------------------------------------------------------
-_BASE = os.environ.get("API_BASE_URL") or "https://susannnnn-openinbox.hf.space"
-API_BASE_URL = _BASE.rstrip("/")
 
-MODEL_NAME = os.environ.get("MODEL_NAME", "gpt-4o-mini")
-API_KEY    = os.environ.get("API_KEY", "none")
+# 1. LLM proxy -- PROVIDED BY EVALUATOR via environment injection.
+#    Use ONLY as base_url for the OpenAI client.
+#    DO NOT use for /reset, /step, /grader, or any other HTTP call.
+LLM_BASE_URL = (os.environ.get("API_BASE_URL") or "").rstrip("/")
+API_KEY       = (
+    os.environ.get("API_KEY")
+    or os.environ.get("HF_TOKEN")
+    or "none"
+)
+MODEL_NAME = os.environ.get("MODEL_NAME") or "gpt-4o-mini"
+
+# 2. Our environment server -- THE DEPLOYED HF SPACE.
+#    Hardcoded. Never read from API_BASE_URL or any evaluator-injected variable.
+#    The evaluator has already validated this Space is running (Phase 1).
+ENV_SERVER_URL = "https://susannnnn-openinbox.hf.space"
 
 TASKS     = ["task_easy", "task_medium", "task_hard"]
 MAX_STEPS = 25        # task_hard horizon is 20 — pad by 5 for safety
@@ -103,15 +123,38 @@ def _clamp(score: float) -> float:
 
 
 # ------------------------------------------------------------------
-# Lazy singleton LLM client — one connection reused across all steps
+# Lazy singleton LLM client -- uses the EVALUATOR'S LiteLLM proxy.
+# Initialized on first use, reused across all steps.
 # ------------------------------------------------------------------
 _llm_client: OpenAI | None = None
+
 
 def _get_client() -> OpenAI:
     global _llm_client
     if _llm_client is None:
-        _llm_client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
+        _llm_client = OpenAI(
+            base_url=LLM_BASE_URL,  # evaluator's LiteLLM proxy
+            api_key=API_KEY,
+        )
     return _llm_client
+
+
+def _ping_proxy() -> None:
+    """
+    Make a guaranteed lightweight call to the LiteLLM proxy at startup.
+    Ensures at least one API call registers on the evaluator's logger
+    even before the episode loop begins. Does not block on failure.
+    """
+    try:
+        client = _get_client()
+        client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=[{"role": "user", "content": "ping"}],
+            max_tokens=1,
+            temperature=0,
+        )
+    except Exception:
+        pass  # Ping failed -- full calls will still be attempted per step
 
 
 # ------------------------------------------------------------------
@@ -265,13 +308,15 @@ def _llm_decide(obs: dict) -> dict:
 
 
 # ------------------------------------------------------------------
-# HTTP helpers — every call returns {} on ANY failure.
+# HTTP helpers -- all calls go to ENV_SERVER_URL (our HF Space).
+# NEVER reads LLM_BASE_URL or API_BASE_URL.
+# Returns {} on any failure so callers don't need to handle exceptions.
 # ------------------------------------------------------------------
 
 def _post(path: str, payload: dict) -> dict:
     try:
         r = httpx.post(
-            f"{API_BASE_URL}{path}",
+            f"{ENV_SERVER_URL}{path}",   # always our HF Space, never the LLM proxy
             json=payload,
             timeout=TIMEOUT,
         )
@@ -419,6 +464,10 @@ def _run_task(task_id: str) -> None:
 # ------------------------------------------------------------------
 
 def main() -> None:
+    # Ping the LLM proxy at startup -- guarantees at least one API call
+    # registers on the evaluator's logger before any episode begins.
+    _ping_proxy()
+
     for task_id in TASKS:
         try:
             _run_task(task_id)
