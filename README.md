@@ -43,6 +43,18 @@ This is not a classification performance gap. It is a sequential reasoning gap.
 > to adapt across steps as the email thread evolves. This is the defining property that separates
 > OpenInbox from a classification benchmark.
 
+**On the rule-based vs LLM gap:** The rule-based agent is a hand-tuned, environment-specific
+oracle — it knows the exact routing vocabulary, injection signatures, and keyword triggers of
+OpenInbox by design, making it a near-ceiling upper bound rather than a realistic agent.
+The LLM agent (gpt-4o-mini, zero-shot, no task-specific fine-tuning) must infer routing intent
+purely from email content, making its 0.75 average a meaningful zero-shot baseline on a novel
+multi-step task. The performance gap is the intended signal: a benchmark where a zero-shot LLM
+immediately matches a hand-crafted rule system would indicate the task is solvable by surface
+pattern-matching alone. That the LLM underperforms on `task_hard` specifically — where thread
+topics shift mid-episode, injection must be detected in-sequence, and a decision at step 0
+determines what email arrives at step 2 — confirms that the environment rewards sequential
+adaptation, not classification.
+
 ---
 
 ## Phase 2 Inference Output (live run)
