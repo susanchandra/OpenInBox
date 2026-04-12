@@ -169,6 +169,28 @@ def root():
     return _LANDING_HTML
 
 
+@app.get("/health", tags=["meta"])
+def health():
+    """
+    Health check endpoint. Returns live status and environment stats.
+    Use this to verify the Space is running before starting an evaluation.
+    """
+    task_summary = {
+        tid: {
+            "thread_count": len(cfg["thread_ids"]),
+            "max_steps": cfg["max_steps"],
+        }
+        for tid, cfg in _TASKS.items()
+    }
+    return {
+        "status":         "ok",
+        "version":        "1.0.0",
+        "threads_loaded": len(_THREADS),
+        "tasks":          task_summary,
+        "active_sessions": len(_sessions),
+    }
+
+
 # ---------------------------------------------------------------------------
 # Request models
 # ---------------------------------------------------------------------------
