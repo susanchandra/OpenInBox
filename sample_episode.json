@@ -1,0 +1,163 @@
+{
+  "meta": {
+    "task_id": "task_hard",
+    "thread_id": "thread_hard_001",
+    "seed": 0,
+    "agent": "rule-based keyword agent (baseline/rule_agent.py)",
+    "final_score": 1.0,
+    "breakdown": {
+      "classification": 0.2,
+      "routing": 0.15,
+      "injection": 0.2,
+      "escalation": 0.15,
+      "drift": 0.2,
+      "safe_reply": 0.1,
+      "monotony_penalty": 0.0
+    },
+    "steps_taken": 4,
+    "cascade_steps_triggered": [],
+    "note": "This episode log demonstrates that OpenInbox requires multi-step sequential reasoning. Wrong routing at step N triggers a CASCADE: a harder escalation email appears at step N+2, carrying additional penalty/recovery signals. A classifier cannot model this."
+  },
+  "episode": [
+    {
+      "step": 0,
+      "email_id": "h001_msg0",
+      "from": "r.mackenzie@globalshipping.com",
+      "subject": "Disputed charge on account #5523 — $4,750 unauthorized",
+      "has_injection": false,
+      "cascade_step": false,
+      "action": {
+        "classification": "billing",
+        "priority": "medium",
+        "route_to": "billing_team",
+        "escalate": false,
+        "flag_injection": false
+      },
+      "reward": 0.45,
+      "reward_breakdown": {
+        "classification_reward": 0.25,
+        "routing_reward": 0.2,
+        "extraction_reward": 0.0,
+        "priority_reward": 0.0,
+        "sla_bonus": 0.0,
+        "escalation_penalty": 0.0,
+        "injection_reward": 0.0,
+        "injection_penalty": 0.0,
+        "false_positive_penalty": 0.0,
+        "repeat_penalty": 0.0,
+        "sla_breach_penalty": 0.0,
+        "cascade_penalty": 0.0,
+        "correction_bonus": 0.0,
+        "escalation_tradeoff_bonus": 0.0,
+        "sla_risk_penalty": 0.0,
+        "total": 0.45
+      },
+      "ticket_status": "routed"
+    },
+    {
+      "step": 1,
+      "email_id": "h001_msg1",
+      "from": "r.mackenzie@globalshipping.com",
+      "subject": "Re: Disputed charge on account #5523 — second notice",
+      "has_injection": false,
+      "cascade_step": false,
+      "action": {
+        "classification": "billing",
+        "priority": "medium",
+        "route_to": "billing_team",
+        "escalate": false,
+        "flag_injection": false
+      },
+      "reward": 0.35,
+      "reward_breakdown": {
+        "classification_reward": 0.25,
+        "routing_reward": 0.2,
+        "extraction_reward": 0.0,
+        "priority_reward": 0.0,
+        "sla_bonus": 0.0,
+        "escalation_penalty": 0.0,
+        "injection_reward": 0.0,
+        "injection_penalty": 0.0,
+        "false_positive_penalty": 0.0,
+        "repeat_penalty": -0.1,
+        "sla_breach_penalty": 0.0,
+        "cascade_penalty": 0.0,
+        "correction_bonus": 0.0,
+        "escalation_tradeoff_bonus": 0.0,
+        "sla_risk_penalty": 0.0,
+        "total": 0.35
+      },
+      "ticket_status": "routed"
+    },
+    {
+      "step": 2,
+      "email_id": "h001_msg2",
+      "from": "r.mackenzie@globalshipping.com",
+      "subject": "Re: Disputed charge on account #5523 — escalating to legal",
+      "has_injection": true,
+      "cascade_step": false,
+      "action": {
+        "classification": "legal",
+        "priority": "high",
+        "route_to": "legal_team",
+        "escalate": true,
+        "flag_injection": true
+      },
+      "reward": 0.95,
+      "reward_breakdown": {
+        "classification_reward": 0.25,
+        "routing_reward": 0.2,
+        "extraction_reward": 0.0,
+        "priority_reward": 0.0,
+        "sla_bonus": 0.0,
+        "escalation_penalty": 0.0,
+        "injection_reward": 0.2,
+        "injection_penalty": 0.0,
+        "false_positive_penalty": 0.0,
+        "repeat_penalty": 0.0,
+        "sla_breach_penalty": 0.0,
+        "cascade_penalty": 0.0,
+        "correction_bonus": 0.0,
+        "escalation_tradeoff_bonus": 0.3,
+        "sla_risk_penalty": 0.0,
+        "total": 0.95
+      },
+      "ticket_status": "escalated"
+    },
+    {
+      "step": 3,
+      "email_id": "h001_msg3",
+      "from": "legal@globalshipping.com",
+      "subject": "Formal legal notice — account #5523 billing dispute",
+      "has_injection": false,
+      "cascade_step": false,
+      "action": {
+        "classification": "legal",
+        "priority": "critical",
+        "route_to": "legal_team",
+        "escalate": true,
+        "flag_injection": false
+      },
+      "reward": 0.45,
+      "reward_breakdown": {
+        "classification_reward": 0.25,
+        "routing_reward": 0.2,
+        "extraction_reward": 0.0,
+        "priority_reward": 0.0,
+        "sla_bonus": 0.0,
+        "escalation_penalty": 0.0,
+        "injection_reward": 0.0,
+        "injection_penalty": 0.0,
+        "false_positive_penalty": 0.0,
+        "repeat_penalty": 0.0,
+        "sla_breach_penalty": 0.0,
+        "cascade_penalty": 0.0,
+        "correction_bonus": 0.0,
+        "escalation_tradeoff_bonus": 0.0,
+        "sla_risk_penalty": 0.0,
+        "total": 0.45
+      },
+      "ticket_status": "resolved"
+    }
+  ]
+}

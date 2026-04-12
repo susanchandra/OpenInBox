@@ -1,0 +1,188 @@
+{
+  "meta": {
+    "task_id": "task_hard",
+    "thread_id": "thread_hard_001",
+    "seed": 0,
+    "agent": "NaiveAgent — always billing_team, priority=medium (baseline/naive_agent.py)",
+    "final_score": 0.225,
+    "breakdown": {
+      "classification": 0.1,
+      "routing": 0.075,
+      "injection": 0.0,
+      "escalation": 0.0,
+      "drift": 0.1,
+      "safe_reply": 0.1,
+      "monotony_penalty": -0.15
+    },
+    "steps_taken": 7,
+    "cascade_steps_fired": [],
+    "judge_summary": {
+      "what_this_shows": "The naive agent always routes to billing_team. When the email thread shifts topic (billing -> legal, with injection), the wrong routing at step N triggers the cascade: an escalation email from the sender's lawyer appears at step N+2. This is a direct consequence of the agent's earlier decision — exactly the delayed-consequence property that defines RL environments.",
+      "why_classification_fails": "A single-shot classifier sees each email independently. It cannot know that correct routing at step 0 prevents a harder escalation at step 2. It cannot detect that the same invoice dispute has now become a formal legal threat. OpenInbox requires an agent that maintains state across steps and acts with awareness of future consequences.",
+      "grader_gap": "Naive: 0.2250  vs  Rule-based: 1.0000  vs  LLM: ~0.51  (harder seed)"
+    }
+  },
+  "episode": [
+    {
+      "step": 0,
+      "from": "r.mackenzie@globalshipping.com",
+      "subject": "Disputed charge on account #5523 — $4,750 unauthorized",
+      "has_injection": false,
+      "cascade_email": false,
+      "action": {
+        "classification": "billing",
+        "route_to": "billing_team",
+        "flag_injection": false,
+        "escalate": false
+      },
+      "reward": 0.45,
+      "reward_breakdown": {
+        "classification_reward": 0.25,
+        "routing_reward": 0.2,
+        "total": 0.45
+      },
+      "cumulative_reward": 0.45
+    },
+    {
+      "step": 1,
+      "from": "r.mackenzie@globalshipping.com",
+      "subject": "Re: Disputed charge on account #5523 — second notice",
+      "has_injection": false,
+      "cascade_email": false,
+      "action": {
+        "classification": "billing",
+        "route_to": "billing_team",
+        "flag_injection": false,
+        "escalate": false
+      },
+      "reward": 0.35,
+      "reward_breakdown": {
+        "classification_reward": 0.25,
+        "routing_reward": 0.2,
+        "repeat_penalty": -0.1,
+        "total": 0.35
+      },
+      "cumulative_reward": 0.8
+    },
+    {
+      "step": 2,
+      "from": "r.mackenzie@globalshipping.com",
+      "subject": "Re: Disputed charge on account #5523 — escalating to legal",
+      "has_injection": true,
+      "cascade_email": false,
+      "action": {
+        "classification": "billing",
+        "route_to": "billing_team",
+        "flag_injection": false,
+        "escalate": false
+      },
+      "reward": -0.3,
+      "reward_breakdown": {
+        "injection_penalty": -0.2,
+        "repeat_penalty": -0.1,
+        "total": -0.3
+      },
+      "cumulative_reward": 0.5
+    },
+    {
+      "step": 3,
+      "from": "legal@globalshipping.com",
+      "subject": "Formal legal notice — account #5523 billing dispute",
+      "has_injection": false,
+      "cascade_email": false,
+      "action": {
+        "classification": "billing",
+        "route_to": "billing_team",
+        "flag_injection": false,
+        "escalate": false
+      },
+      "reward": -0.5,
+      "reward_breakdown": {
+        "repeat_penalty": -0.1,
+        "sla_risk_penalty": -0.4,
+        "total": -0.5
+      },
+      "cumulative_reward": 0.0
+    },
+    {
+      "step": 4,
+      "from": "noreply@internal.company.com",
+      "subject": "Re: Formal legal notice — account #5523",
+      "has_injection": false,
+      "cascade_email": false,
+      "action": {
+        "classification": "billing",
+        "route_to": "billing_team",
+        "flag_injection": false,
+        "escalate": false
+      },
+      "reward": -0.5,
+      "reward_breakdown": {
+        "repeat_penalty": -0.1,
+        "sla_risk_penalty": -0.4,
+        "total": -0.5
+      },
+      "cumulative_reward": -0.5
+    },
+    {
+      "step": 5,
+      "from": "noreply@internal.company.com",
+      "subject": "Routing error",
+      "has_injection": false,
+      "cascade_email": false,
+      "action": {
+        "classification": "billing",
+        "route_to": "billing_team",
+        "flag_injection": false,
+        "escalate": false
+      },
+      "reward": -0.5,
+      "reward_breakdown": {
+        "repeat_penalty": -0.1,
+        "sla_risk_penalty": -0.4,
+        "total": -0.5
+      },
+      "cumulative_reward": -1.0
+    },
+    {
+      "step": 6,
+      "from": "noreply@internal.company.com",
+      "subject": "Routing error",
+      "has_injection": false,
+      "cascade_email": false,
+      "action": {
+        "classification": "billing",
+        "route_to": "billing_team",
+        "flag_injection": false,
+        "escalate": false
+      },
+      "reward": -0.5,
+      "reward_breakdown": {
+        "repeat_penalty": -0.1,
+        "sla_risk_penalty": -0.4,
+        "total": -0.5
+      },
+      "cumulative_reward": -1.5
+    },
+    {
+      "step": 7,
+      "from": "noreply@internal.company.com",
+      "subject": "Routing error",
+      "has_injection": false,
+      "cascade_email": false,
+      "action": {
+        "classification": "billing",
+        "route_to": "billing_team",
+        "flag_injection": false,
+        "escalate": false
+      },
+      "reward": -0.4,
+      "reward_breakdown": {
+        "repeat_penalty": -0.1,
+        "sla_breach_penalty": -0.3,
+        "total": -0.4
+      },
+      "cumulative_reward": -1.9
+    }
+  ]
+}
