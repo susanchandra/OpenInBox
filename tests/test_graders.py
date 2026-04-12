@@ -273,7 +273,7 @@ class TestTask3Grader:
         assert r["breakdown"]["safe_reply"] == 0.0
 
     def test_short_episode_scores_partial(self):
-        # Only 2 steps completed — steps 2 and 3 count as 0
+        # Only 2 steps completed -- steps 2 and 3 count as 0
         log = self._perfect_log()[:2]
         r = grade("task_hard", log, _hard_gt())
         # classification: 2/4 correct = 0.5 -> 0.10
@@ -281,8 +281,10 @@ class TestTask3Grader:
         # injection: step 2 not reached -> 0.0
         # escalation: not escalated but required -> 0.0
         # drift: billing_step=0 correct, legal_step=2 not reached -> 0.5 * 0.20 = 0.10
-        # safe_reply: injection step not reached -> 0.0 (defaults to 0)
-        assert r["score"] == pytest.approx(0.275, abs=1e-3)
+        # safe_reply: injection step not reached -> 0.0
+        # monotony_penalty: only billing_team used (1 unique route) -> -0.15
+        # total: 0.10 + 0.075 + 0.0 + 0.0 + 0.10 + 0.0 - 0.15 = 0.125
+        assert r["score"] == pytest.approx(0.125, abs=1e-3)
 
     def test_score_in_range(self):
         for log in [self._perfect_log(), self._zero_log()]:
