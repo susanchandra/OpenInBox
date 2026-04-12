@@ -15,7 +15,7 @@ from baseline.naive_agent import NaiveAgent
 
 TASK_ID  = "task_hard"
 SEED     = 0
-OUT_PATH = Path("cascade_demo.json")
+OUT_PATH = Path("rl_episode_trace.json")
 
 env   = OpenInboxEnv()
 agent = NaiveAgent()
