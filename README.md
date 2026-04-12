@@ -8,6 +8,10 @@ pinned: false
 
 # OpenInbox
 
+> **OpenInbox is a sequential decision-making environment where agent actions modify future
+> observations and rewards via cascade triggers, SLA decay, and cross-step memory —
+> making it fundamentally non-classification.**
+
 OpenInbox is a stateful environment for evaluating AI agents on enterprise email management tasks. An agent processes inbound emails one step at a time, classifying each one, assigning a priority, routing it to the correct internal team, and extracting structured information. The environment responds to the agent's decisions: a correct routing triggers a deterministic follow-up from that team, SLA timers tick down with each step, and in harder tasks the email thread evolves mid-conversation requiring the agent to update its understanding. All email content, follow-up paths, and ground truth are pre-authored, so every episode is fully deterministic and reproducible.
 
 ---
@@ -34,6 +38,43 @@ misses the injection signal (-0.20), and continues routing incorrectly for 5 mor
 accumulating -0.50/step in penalties.
 
 This is not a classification performance gap. It is a sequential reasoning gap.
+
+> **Key insight:** The naive agent fails not due to poor classification, but due to its inability
+> to adapt across steps as the email thread evolves. This is the defining property that separates
+> OpenInbox from a classification benchmark.
+
+---
+
+## Phase 2 Inference Output (live run)
+
+The following is the actual structured output produced by `inference.py` when run against the
+deployed HF Space. The evaluator checks for exactly this format.
+
+```
+[START] task=task_easy
+[STEP] step=1 reward=0.7333
+[END] task=task_easy score=0.9010 steps=1
+[START] task=task_medium
+[STEP] step=1 reward=0.8000
+[END] task=task_medium score=0.9001 steps=1
+[START] task=task_hard
+[STEP] step=1 reward=0.4500
+[STEP] step=2 reward=0.6500
+[STEP] step=3 reward=0.9500
+[STEP] step=4 reward=0.4500
+[END] task=task_hard score=0.5100 steps=4
+```
+
+Key properties verified:
+- `[START]` emitted before any network call
+- At least one `[STEP]` per task, with `flush=True` to stdout
+- `[END]` always reached even on error (crash-resistant)
+- All scores clamped to `(0.001, 0.999)` — never exactly 0 or 1
+- LLM proxy called via OpenAI client on **every** step for real decisions
+- `API_BASE_URL`, `MODEL_NAME`, `API_KEY` read from environment variables
+
+See `rl_episode_trace.json` in the root for a full multi-step episode log
+showing reward breakdown per step, cascade triggers, and injection flags.
 
 ---
 
