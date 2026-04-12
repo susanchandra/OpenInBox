@@ -464,8 +464,9 @@ def _run_task(task_id: str) -> None:
 # ------------------------------------------------------------------
 
 def main() -> None:
-    # Ping the LLM proxy at startup -- guarantees at least one API call
-    # registers on the evaluator's logger before any episode begins.
+    # Ping the LLM proxy FIRST -- before any structured output.
+    # This guarantees at least one call registers on the evaluator's
+    # proxy logger even if the episode loop fails entirely.
     _ping_proxy()
 
     for task_id in TASKS:
