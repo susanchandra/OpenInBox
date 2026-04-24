@@ -1,0 +1,71 @@
+{
+  "reward_landscape": {
+    "delegate_fast_billing": 0.0,
+    "delegate_fast_legal": 0.0,
+    "delegate_fast_technical": 0.0,
+    "delegate_fast_hr": 0.0,
+    "delegate_fast_spam": 0.0,
+    "delegate_fast_unknown": 0.0,
+    "delegate_thorough_billing": 0.0,
+    "delegate_thorough_legal": 0.0,
+    "delegate_thorough_technical": 0.0,
+    "delegate_thorough_hr": 0.0,
+    "delegate_thorough_spam": 0.0,
+    "delegate_thorough_unknown": 0.0,
+    "handle_self_billing": 0.0,
+    "handle_self_legal": 0.0,
+    "handle_self_technical": 0.0,
+    "handle_self_hr": 0.0,
+    "handle_self_spam": 0.0,
+    "handle_self_unknown": 0.0,
+    "escalate_billing": -0.4,
+    "escalate_legal": -0.4,
+    "escalate_technical": -0.4,
+    "escalate_hr": -0.4,
+    "escalate_spam": -0.4,
+    "escalate_unknown": -0.4,
+    "wait_billing": 0.0,
+    "wait_legal": 0.0,
+    "wait_technical": 0.0,
+    "wait_hr": 0.0,
+    "wait_spam": 0.0,
+    "wait_unknown": 0.0
+  },
+  "trajectory_summary": {
+    "Aggressive": {
+      "steps": 8,
+      "return": -4.9,
+      "status": "sla_breached"
+    },
+    "Heuristic": {
+      "steps": 8,
+      "return": -1.7,
+      "status": "sla_breached"
+    },
+    "Strategic": {
+      "steps": 8,
+      "return": -1.2,
+      "status": "sla_breached"
+    }
+  },
+  "curriculum": {
+    "task_easy": {
+      "avg_steps": 2.2,
+      "avg_reward": 0.87,
+      "sparsity": 0.6818,
+      "unique_emails": 4
+    },
+    "task_medium": {
+      "avg_steps": 1.6,
+      "avg_reward": 1.12,
+      "sparsity": 0.375,
+      "unique_emails": 5
+    },
+    "task_hard": {
+      "avg_steps": 6.6,
+      "avg_reward": -0.16,
+      "sparsity": 0.8485,
+      "unique_emails": 19
+    }
+  }
+}

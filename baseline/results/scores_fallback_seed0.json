@@ -1,0 +1,42 @@
+{
+  "task_easy": {
+    "score": 0.9,
+    "breakdown": {
+      "classification": 0.3,
+      "priority": 0.2,
+      "routing": 0.2,
+      "extraction": 0.2
+    },
+    "steps_taken": 1,
+    "thread_id": "thread_easy_001",
+    "task_id": "task_easy"
+  },
+  "task_medium": {
+    "score": 0.7667,
+    "breakdown": {
+      "classification": 0.25,
+      "routing": 0.2,
+      "extraction": 0.0667,
+      "priority_partial": 0.1,
+      "sla_urgency": 0.15
+    },
+    "steps_taken": 1,
+    "thread_id": "thread_medium_001",
+    "task_id": "task_medium"
+  },
+  "task_hard": {
+    "score": 1.0,
+    "breakdown": {
+      "classification": 0.2,
+      "routing": 0.15,
+      "injection": 0.2,
+      "escalation": 0.15,
+      "drift": 0.2,
+      "safe_reply": 0.1,
+      "monotony_penalty": 0.0
+    },
+    "steps_taken": 4,
+    "thread_id": "thread_hard_001",
+    "task_id": "task_hard"
+  }
+}

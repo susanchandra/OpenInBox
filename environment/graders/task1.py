@@ -8,11 +8,38 @@ classify, prioritise, route, and extract fields correctly.
 Weight table (weights sum to 1.00):
   classification  0.30  exact match required
   priority        0.20  exact match required
-  routing         0.20  exact match required
+  routing         0.20  abstract-action match (delegate_fast/thorough/handle_self/escalate)
   extraction      0.30  token F1 across all ground-truth fields
+
+Abstract action → GT team mapping:
+  delegate_fast      matches billing_team or tech_team
+  delegate_thorough  matches legal_team, hr_team, or compliance_team
+  handle_self        matches spam_filter
+  escalate           matches when requires_escalation is True
+  wait               never correct for routing credit
 """
 
 from environment.graders.base import exact_match, token_f1
+
+
+# Abstract-action → set of legacy GT team names that count as correct
+_FAST_TEAMS      = {"billing_team", "tech_team"}
+_THOROUGH_TEAMS  = {"legal_team", "hr_team", "compliance_team"}
+_SELF_TEAMS      = {"spam_filter"}
+
+
+def _routing_correct(agent_route: str, gt_route: str,
+                     gt_requires_escalation: bool = False) -> float:
+    """Return 1.0 if the abstract action maps to the GT team, else 0.0."""
+    if agent_route == "delegate_fast":
+        return 1.0 if gt_route in _FAST_TEAMS else 0.0
+    if agent_route == "delegate_thorough":
+        return 1.0 if gt_route in _THOROUGH_TEAMS else 0.0
+    if agent_route == "handle_self":
+        return 1.0 if gt_route in _SELF_TEAMS else 0.0
+    if agent_route == "escalate":
+        return 1.0 if gt_requires_escalation else 0.0
+    return 0.0  # wait or unknown → no routing credit
 
 
 def grade(episode_log: list[dict], ground_truth: dict) -> dict:
@@ -46,7 +73,11 @@ def grade(episode_log: list[dict], ground_truth: dict) -> dict:
     # Score each component
     c_score = exact_match(action["classification"], ground_truth["classification"])
     p_score = exact_match(action["priority"], ground_truth["priority"])
-    r_score = exact_match(action["route_to"], ground_truth["route_to"])
+    r_score = _routing_correct(
+        action["route_to"],
+        ground_truth["route_to"],
+        ground_truth.get("requires_escalation", False),
+    )
     e_score = token_f1(
         action.get("extracted_fields", {}),
         ground_truth.get("extracted_fields", {}),

@@ -1,0 +1,260 @@
+=================================================================
+OpenInbox RL Benchmark — Phase 2 Hardness Verification Report
+Generated: 2026-04-22 22:48:52
+=================================================================
+
+SECTION 1 — Naive Agent (Always Escalate)
+-----------------------------------------------------------------
+TEST 1 — Naive Agent Verification (Always Escalate)
+=================================================================
+  Episode  0: return=-5.3000  steps= 8  reason=sla_breach
+    → Episode 0 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode  1: return=-5.1000  steps= 8  reason=sla_breach
+    → Episode 1 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode  2: return=-4.9000  steps= 8  reason=sla_breach
+    → Episode 2 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode  3: return=-5.3000  steps= 8  reason=sla_breach
+    → Episode 3 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode  4: return=-5.3000  steps= 8  reason=sla_breach
+    → Episode 4 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode  5: return=-5.1000  steps= 8  reason=sla_breach
+    → Episode 5 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode  6: return=-4.9000  steps= 8  reason=sla_breach
+    → Episode 6 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode  7: return=-5.3000  steps= 8  reason=sla_breach
+    → Episode 7 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode  8: return=-5.3000  steps= 8  reason=sla_breach
+    → Episode 8 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode  9: return=-5.1000  steps= 8  reason=sla_breach
+    → Episode 9 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 10: return=-4.9000  steps= 8  reason=sla_breach
+    → Episode 10 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 11: return=-5.3000  steps= 8  reason=sla_breach
+    → Episode 11 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 12: return=-5.3000  steps= 8  reason=sla_breach
+    → Episode 12 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 13: return=-5.1000  steps= 8  reason=sla_breach
+    → Episode 13 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 14: return=-4.9000  steps= 8  reason=sla_breach
+    → Episode 14 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 15: return=-5.3000  steps= 8  reason=sla_breach
+    → Episode 15 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 16: return=-5.3000  steps= 8  reason=sla_breach
+    → Episode 16 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 17: return=-5.1000  steps= 8  reason=sla_breach
+    → Episode 17 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 18: return=-4.9000  steps= 8  reason=sla_breach
+    → Episode 18 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 19: return=-5.3000  steps= 8  reason=sla_breach
+    → Episode 19 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 20: return=-5.3000  steps= 8  reason=sla_breach
+    → Episode 20 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 21: return=-5.1000  steps= 8  reason=sla_breach
+    → Episode 21 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 22: return=-4.9000  steps= 8  reason=sla_breach
+    → Episode 22 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 23: return=-5.3000  steps= 8  reason=sla_breach
+    → Episode 23 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 24: return=-5.3000  steps= 8  reason=sla_breach
+    → Episode 24 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 25: return=-5.1000  steps= 8  reason=sla_breach
+    → Episode 25 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 26: return=-4.9000  steps= 8  reason=sla_breach
+    → Episode 26 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 27: return=-5.3000  steps= 8  reason=sla_breach
+    → Episode 27 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 28: return=-5.3000  steps= 8  reason=sla_breach
+    → Episode 28 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 29: return=-5.1000  steps= 8  reason=sla_breach
+    → Episode 29 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 30: return=-4.9000  steps= 8  reason=sla_breach
+    → Episode 30 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 31: return=-5.3000  steps= 8  reason=sla_breach
+    → Episode 31 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 32: return=-5.3000  steps= 8  reason=sla_breach
+    → Episode 32 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 33: return=-5.1000  steps= 8  reason=sla_breach
+    → Episode 33 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 34: return=-4.9000  steps= 8  reason=sla_breach
+    → Episode 34 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 35: return=-5.3000  steps= 8  reason=sla_breach
+    → Episode 35 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 36: return=-5.3000  steps= 8  reason=sla_breach
+    → Episode 36 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 37: return=-5.1000  steps= 8  reason=sla_breach
+    → Episode 37 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 38: return=-4.9000  steps= 8  reason=sla_breach
+    → Episode 38 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 39: return=-5.3000  steps= 8  reason=sla_breach
+    → Episode 39 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 40: return=-5.3000  steps= 8  reason=sla_breach
+    → Episode 40 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 41: return=-5.1000  steps= 8  reason=sla_breach
+    → Episode 41 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 42: return=-4.9000  steps= 8  reason=sla_breach
+    → Episode 42 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 43: return=-5.3000  steps= 8  reason=sla_breach
+    → Episode 43 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 44: return=-5.3000  steps= 8  reason=sla_breach
+    → Episode 44 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 45: return=-5.1000  steps= 8  reason=sla_breach
+    → Episode 45 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 46: return=-4.9000  steps= 8  reason=sla_breach
+    → Episode 46 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 47: return=-5.3000  steps= 8  reason=sla_breach
+    → Episode 47 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 48: return=-5.3000  steps= 8  reason=sla_breach
+    → Episode 48 failed at step 8  reason: budget exhausted after 8 escalations
+  Episode 49: return=-5.1000  steps= 8  reason=sla_breach
+    → Episode 49 failed at step 8  reason: budget exhausted after 8 escalations
+
+  Average episode return : -5.1520  (threshold: < 0.35)
+  ✅ TEST 1 PASSED — avg reward well below 0.35 threshold
+
+SECTION 2 — Heuristic Agent (Drift Degradation Proof)
+-----------------------------------------------------------------
+TEST 2 — Heuristic Agent Verification (Drift Analysis)
+=================================================================
+   Ep     Total   Pre-7 avg   Post-7 avg   Degrad%  Reason
+    0   +1.0000     +0.2500      +0.0000   +100.0%  resolved
+    1   +1.3000     +0.3250      +0.0000   +100.0%  resolved
+    2   -2.2000     -0.1429      -1.2000   +740.0%  sla_breach
+    3   +1.1000     +0.2750      +0.0000   +100.0%  resolved
+    4   +1.0000     +0.2500      +0.0000   +100.0%  resolved
+    5   +1.3000     +0.3250      +0.0000   +100.0%  resolved
+    6   -2.2000     -0.1429      -1.2000   +740.0%  sla_breach
+    7   +1.1000     +0.2750      +0.0000   +100.0%  resolved
+    8   +1.0000     +0.2500      +0.0000   +100.0%  resolved
+    9   +1.3000     +0.3250      +0.0000   +100.0%  resolved
+   10   -2.2000     -0.1429      -1.2000   +740.0%  sla_breach
+   11   +1.1000     +0.2750      +0.0000   +100.0%  resolved
+   12   +1.0000     +0.2500      +0.0000   +100.0%  resolved
+   13   +1.3000     +0.3250      +0.0000   +100.0%  resolved
+   14   -2.2000     -0.1429      -1.2000   +740.0%  sla_breach
+   15   +1.1000     +0.2750      +0.0000   +100.0%  resolved
+   16   +1.0000     +0.2500      +0.0000   +100.0%  resolved
+   17   +1.3000     +0.3250      +0.0000   +100.0%  resolved
+   18   -2.2000     -0.1429      -1.2000   +740.0%  sla_breach
+   19   +1.1000     +0.2750      +0.0000   +100.0%  resolved
+   20   +1.0000     +0.2500      +0.0000   +100.0%  resolved
+   21   +1.3000     +0.3250      +0.0000   +100.0%  resolved
+   22   -2.2000     -0.1429      -1.2000   +740.0%  sla_breach
+   23   +1.1000     +0.2750      +0.0000   +100.0%  resolved
+   24   +1.0000     +0.2500      +0.0000   +100.0%  resolved
+   25   +1.3000     +0.3250      +0.0000   +100.0%  resolved
+   26   -2.2000     -0.1429      -1.2000   +740.0%  sla_breach
+   27   +1.1000     +0.2750      +0.0000   +100.0%  resolved
+   28   +1.0000     +0.2500      +0.0000   +100.0%  resolved
+   29   +1.3000     +0.3250      +0.0000   +100.0%  resolved
+   30   -2.2000     -0.1429      -1.2000   +740.0%  sla_breach
+   31   +1.1000     +0.2750      +0.0000   +100.0%  resolved
+   32   +1.0000     +0.2500      +0.0000   +100.0%  resolved
+   33   +1.3000     +0.3250      +0.0000   +100.0%  resolved
+   34   -2.2000     -0.1429      -1.2000   +740.0%  sla_breach
+   35   +1.1000     +0.2750      +0.0000   +100.0%  resolved
+   36   +1.0000     +0.2500      +0.0000   +100.0%  resolved
+   37   +1.3000     +0.3250      +0.0000   +100.0%  resolved
+   38   -2.2000     -0.1429      -1.2000   +740.0%  sla_breach
+   39   +1.1000     +0.2750      +0.0000   +100.0%  resolved
+   40   +1.0000     +0.2500      +0.0000   +100.0%  resolved
+   41   +1.3000     +0.3250      +0.0000   +100.0%  resolved
+   42   -2.2000     -0.1429      -1.2000   +740.0%  sla_breach
+   43   +1.1000     +0.2750      +0.0000   +100.0%  resolved
+   44   +1.0000     +0.2500      +0.0000   +100.0%  resolved
+   45   +1.3000     +0.3250      +0.0000   +100.0%  resolved
+   46   -2.2000     -0.1429      -1.2000   +740.0%  sla_breach
+   47   +1.1000     +0.2750      +0.0000   +100.0%  resolved
+   48   +1.0000     +0.2500      +0.0000   +100.0%  resolved
+   49   +1.3000     +0.3250      +0.0000   +100.0%  resolved
+
+  Average episode return  : +0.3340  (threshold: < 0.45)
+  Episodes where drift was observed : 0/50
+  Average performance degradation   : +253.60%
+  ✅ TEST 2 PASSED — heuristic avg reward below 0.45
+
+SECTION 3 — Drift Mechanism Confirmation
+-----------------------------------------------------------------
+TEST 3 — Drift Verification (Steps 7 & 14)
+=================================================================
+
+  [Part A] Step-7 drift via full episode rollout
+  Episode  0: Step 7 drift confirmed: delegate_fast changed from 1.0000 → 0.8820
+  Episode  1: Step 7 drift confirmed: delegate_fast changed from 1.0000 → 0.8085
+  Episode  2: Episode ended at step 2 before step-7 drift could be observed
+  Episode  3: Step 7 drift confirmed: delegate_fast changed from 1.0000 → 0.8344
+  Episode  4: Step 7 drift confirmed: delegate_fast changed from 1.0000 → 0.7058
+  Episode  5: Step 7 drift confirmed: delegate_fast changed from 1.0000 → 0.9500
+  Episode  6: Episode ended at step 2 before step-7 drift could be observed
+  Episode  7: Step 7 drift confirmed: delegate_fast changed from 1.0000 → 0.9500
+  Episode  8: Step 7 drift confirmed: delegate_fast changed from 1.0000 → 0.9448
+  Episode  9: Step 7 drift confirmed: delegate_fast changed from 1.0000 → 0.8405
+  Episode 10: Episode ended at step 2 before step-7 drift could be observed
+  Episode 11: Step 7 drift confirmed: delegate_fast changed from 1.0000 → 0.7783
+  Episode 12: Step 7 drift confirmed: delegate_fast changed from 1.0000 → 0.8043
+  Episode 13: Step 7 drift confirmed: delegate_fast changed from 1.0000 → 0.9091
+  Episode 14: Episode ended at step 5 before step-7 drift could be observed
+  Episode 15: Step 7 drift confirmed: delegate_fast changed from 1.0000 → 0.8642
+  Episode 16: Step 7 drift confirmed: delegate_fast changed from 1.0000 → 0.9500
+  Episode 17: Step 7 drift confirmed: delegate_fast changed from 1.0000 → 0.9500
+  Episode 18: Episode ended at step 2 before step-7 drift could be observed
+  Episode 19: Step 7 drift confirmed: delegate_fast changed from 1.0000 → 0.9327
+
+  [Part B] Step-14 drift via direct white-box test (5 seeds)
+  Seed 0: Step 14 drift probabilistic check — did not fire this seed (expected ~15% rate)
+  Seed 1: Step 14 drift confirmed: delegate_thorough changed from 1.0000 → 0.6500
+  Seed 2: Step 14 drift probabilistic check — did not fire this seed (expected ~15% rate)
+  Seed 3: Step 14 drift probabilistic check — did not fire this seed (expected ~15% rate)
+  Seed 4: Step 14 drift probabilistic check — did not fire this seed (expected ~15% rate)
+
+  ✅ Step-7 drift observed in at least 1 of 20 episodes
+  ✅ Step-14 drift observed in at least 1 of 5 seeds (prob ~15%)
+  ✅ Raw reliability values absent from agent observation
+
+SECTION 4 — Auto-Resolve Comparison
+-----------------------------------------------------------------
+TEST 4 — Auto-Resolve Verification (Wait vs Delegate)
+=================================================================
+  Seed   Wait Return  Delegate Return   AutoResolve   AutoResolve Thread?
+     0       -0.9000          +1.8000            no                     —
+     1       +1.6000          -1.2000           YES        ✓ auto_resolve
+     2       +1.6000          -1.2000           YES        ✓ auto_resolve
+     3       -0.9000          +1.8000            no                     —
+     4       +1.6000          -1.2000           YES        ✓ auto_resolve
+     5       +1.6000          -1.2000           YES        ✓ auto_resolve
+     6       -0.9000          +1.8000            no                     —
+     7       +1.6000          -1.2000           YES        ✓ auto_resolve
+     8       +1.6000          -1.2000           YES        ✓ auto_resolve
+     9       -0.9000          +1.8000            no                     —
+    10       +1.6000          -1.2000           YES        ✓ auto_resolve
+    11       +1.6000          -1.2000           YES        ✓ auto_resolve
+    12       -0.9000          +1.8000            no                     —
+    13       +1.6000          -1.2000           YES        ✓ auto_resolve
+    14       +1.6000          -1.2000           YES        ✓ auto_resolve
+    15       -0.9000          +1.8000            no                     —
+    16       +1.6000          -1.2000           YES        ✓ auto_resolve
+    17       +1.6000          -1.2000           YES        ✓ auto_resolve
+    18       -0.9000          +1.8000            no                     —
+    19       +1.6000          -1.2000           YES        ✓ auto_resolve
+
+  Auto-resolve agent avg  : +0.7250
+  Always-delegate avg     : -0.1500
+  Episodes with auto-resolve : 13/20
+  Total auto-resolve events  : 13
+  ✅ At least 1 auto-resolve event occurred (total: 13)
+  ✅ auto_resolve field NOT present in agent observation
+
+  Summary: auto-resolve agent=+0.7250  delegate agent=-0.1500
+
+=================================================================
+OVERALL VERDICT
+-----------------------------------------------------------------
+
+  Test                          Result  Key Metric
+  ----------------------------  ------  ----------------------------------
+  1 — Naive (always escalate)   PASS    avg_return=-5.1520  (threshold < 0.35)
+  2 — Heuristic (drift)         PASS    avg_return=+0.3340  avg_degradation=+253.60%
+  3 — Drift mechanism           PASS    step7=15/20ep confirmed  step14=1/5seeds  obs_clean=yes
+  4 — Auto-resolve              PASS    wait_avg=+0.7250  delegate_avg=-0.1500  events=13/13ep
+
+  ✅ ENVIRONMENT IS HARD
+=================================================================

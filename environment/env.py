@@ -26,6 +26,7 @@ Cascade consequence chain (task_hard only):
 """
 
 import json
+import random
 from pathlib import Path
 from typing import Optional
 
@@ -35,6 +36,29 @@ from environment import reward as reward_module
 
 
 DATA_DIR = Path(__file__).parent / "data"
+
+# ---------------------------------------------------------------------------
+# Internal action → legacy team-name mapping (used for followup lookup only).
+# The agent sees abstract action names; threads.json keys use old team names.
+# ---------------------------------------------------------------------------
+_FAST_TEAMS   = {"billing_team", "tech_team"}
+_THOROUGH_TEAMS = {"legal_team", "hr_team", "compliance_team"}
+_SELF_TEAMS = {"spam_filter"}
+
+# Default internal team to use per abstract action when followup key lookup fails
+_ACTION_DEFAULT_TEAM: dict[str, str] = {
+    "handle_self":        "spam_filter",
+    "delegate_fast":      "billing_team",
+    "delegate_thorough":  "legal_team",
+    "escalate":           "unknown",
+    "wait":               None,  # type: ignore[assignment]
+}
+
+# Reliability threshold below which a team is considered "degraded".
+_DEGRADED_THRESHOLD = 0.70
+
+# Reliability recovery per wait action (reliability += this, capped at 1.0).
+_WAIT_RECOVERY = 0.10
 
 
 class OpenInboxEnv:
@@ -80,6 +104,17 @@ class OpenInboxEnv:
         self.context_locked: bool = False
         self.tradeoff_risk: bool = False
 
+        # --- Internal reliability tracking (Phase 1B) ---
+        # Named internal_reliability per spec. Hidden from agent — only boolean
+        # degraded flags are exposed in observation. Keys are abstract action names.
+        self.internal_reliability: dict[str, float] = {}
+
+        # --- Budget tracking (locked episode contract) ---
+        self.budget_remaining: float = 1.00
+
+        # --- Delegation History (Phase 1A) ---
+        self.delegation_history: dict[str, list[int]] = {}
+
     # ------------------------------------------------------------------
     # Public interface
     # ------------------------------------------------------------------
@@ -105,6 +140,7 @@ class OpenInboxEnv:
             )
 
         self.task_id = task_id
+        self.episode_seed = seed
         self.thread = self._threads[self.thread_id]
         self.max_steps = task_cfg["max_steps"]
         self.step_count = 0
@@ -121,16 +157,37 @@ class OpenInboxEnv:
         self.context_locked = False
         self.tradeoff_risk = False
 
+        # Reset internal reliability — all routing actions start at full reliability
+        self.internal_reliability = {
+            "delegate_fast":      1.00,
+            "delegate_thorough":  1.00,
+            "handle_self":        1.00,
+        }
+
+        # Reset budget
+        self.budget_remaining = 1.00
+
+        # Reset delegation history
+        self.delegation_history = {
+            "delegate_fast": [],
+            "delegate_thorough": [],
+            "handle_self": [],
+            "escalate": [],
+        }
+
+        # Track consecutive waits per thread
+        self.wait_tracker: dict[str, int] = {}
+
         # One ticket per episode, keyed by thread_id
         self.open_tickets = 1
         self.ticket_status = "open"
 
         self.team_queues = {
-            "billing_team": 0,
-            "tech_team": 0,
-            "hr_team": 0,
-            "legal_team": 0,
-            "spam_filter": 0,
+            "delegate_fast":      0,
+            "delegate_thorough":  0,
+            "handle_self":        0,
+            "escalate":           0,
+            "wait":               0,
         }
 
         # SLA timer only applies to task_medium and task_hard
@@ -180,8 +237,21 @@ class OpenInboxEnv:
         # Capture the step index before we change anything.
         step_idx = self.step_count
 
+        # Normalise escalate flag: route_to=="escalate" implies escalate=True.
+        # We mutate a local copy so the stored action stays as the agent sent it.
+        if action.route_to == "escalate" and not action.escalate:
+            action = action.model_copy(update={"escalate": True})
+
+        # Apply reliability drift dynamically
+        self._drift_team_reliability()
+
         # Determine whether this step was triggered by a cascade event
         is_cascade_step = step_idx in self._cascade_steps
+
+        # Any team currently below the degraded threshold?
+        any_team_degraded = any(
+            v < _DEGRADED_THRESHOLD for v in self.internal_reliability.values()
+        )
 
         # Save the previous action for the repeat-penalty check
         prev = self.prev_action
@@ -221,8 +291,20 @@ class OpenInboxEnv:
                 sla_breach=True,
                 cascade_step=is_cascade_step,
                 corrected_cascade=False,
+                any_team_degraded=any_team_degraded,
             )
             self._append_log(action, breakdown, step_idx)
+            
+            # Phase 1D: Add terminal outcome reward for SLA breach
+            term_reward = reward_module.terminal_outcome_reward(
+                action=action,
+                ground_truth=gt,
+                ticket_status=self.ticket_status,
+                budget_remaining=self.budget_remaining
+            )
+            breakdown.total = round(breakdown.total + term_reward, 4)
+            self.episode_log[-1]["terminal_reward"] = term_reward
+
             return (
                 self._build_observation(),
                 breakdown.total,
@@ -233,11 +315,33 @@ class OpenInboxEnv:
         # 4. Update ticket status and team queues based on the agent's decision
         if action.escalate:
             self.ticket_status = "escalated"
+            self.budget_remaining = round(self.budget_remaining - 0.40, 4)
+        elif action.route_to == "wait":
+            self.ticket_status = "waiting"
+            # Wait allows degraded teams to partially recover
+            for team_key in self.internal_reliability:
+                self.internal_reliability[team_key] = round(
+                    min(1.00, self.internal_reliability[team_key] + _WAIT_RECOVERY), 4
+                )
         else:
             self.ticket_status = "routed"
 
         if action.route_to in self.team_queues:
             self.team_queues[action.route_to] += 1
+
+        # Phase 1C: Update wait_tracker
+        if action.route_to == "wait":
+            self.wait_tracker[self.thread_id] = self.wait_tracker.get(self.thread_id, 0) + 1
+        else:
+            self.wait_tracker[self.thread_id] = 0
+
+        # Phase 1C: Check auto-resolve condition
+        ar_cfg = self.thread.get("auto_resolve", {})
+        if action.route_to == "wait" and ar_cfg.get("enabled", False):
+            if self.wait_tracker[self.thread_id] >= ar_cfg.get("steps_needed", 2):
+                ar_rng = random.Random(f"{self.episode_seed}_{self.step_count}_ar")
+                if ar_rng.random() < ar_cfg.get("probability", 0.65):
+                    return self._auto_resolve(action, step_idx)
 
         # 5. Load the follow-up email for this routing decision
         followup_raw = self._load_followup(action, step_idx)
@@ -298,7 +402,26 @@ class OpenInboxEnv:
             sla_breach=False,
             cascade_step=is_cascade_step,
             corrected_cascade=corrected_cascade,
+            any_team_degraded=any_team_degraded,
         )
+
+        # Update delegation history based on whether routing was correct
+        if action.route_to in self.delegation_history:
+            gt_route = gt.get("route_to", "")
+            gt_requires_escalation = gt.get("requires_escalation", False)
+            
+            # Determine if routing was correct
+            success = 0
+            if action.route_to == "delegate_fast" and gt_route in _FAST_TEAMS:
+                success = 1
+            elif action.route_to == "delegate_thorough" and gt_route in _THOROUGH_TEAMS:
+                success = 1
+            elif action.route_to == "handle_self" and gt_route in _SELF_TEAMS:
+                success = 1
+            elif action.route_to == "escalate" and gt_requires_escalation:
+                success = 1
+
+            self.delegation_history[action.route_to].append(success)
 
         # Strategic tradeoff logic (task_hard only, fires from step 2 onward)
         _TRADEOFF_STEP = 2
@@ -307,9 +430,6 @@ class OpenInboxEnv:
                 # OPTION A: agent chose to escalate — immediate bonus, locks context
                 self.context_locked = True
                 breakdown.escalation_tradeoff_bonus = 0.30
-                breakdown.total = round(
-                    max(-1.0, min(1.0, breakdown.total + 0.30)), 4
-                )
             elif (
                 not self.context_locked
                 and not self.tradeoff_risk
@@ -323,9 +443,6 @@ class OpenInboxEnv:
             if self.tradeoff_risk and step_idx > _TRADEOFF_STEP and gt.get("route_to"):
                 if action.route_to != gt["route_to"]:
                     breakdown.sla_risk_penalty = -0.40
-                    breakdown.total = round(
-                        max(-1.0, min(1.0, breakdown.total - 0.40)), 4
-                    )
 
         # 10. Record this step
         self._append_log(action, breakdown, step_idx)
@@ -353,6 +470,17 @@ class OpenInboxEnv:
             elif self.open_tickets == 0:
                 self.done = True
 
+        # Phase 1D: Add terminal outcome reward
+        if self.done:
+            term_reward = reward_module.terminal_outcome_reward(
+                action=action,
+                ground_truth=gt,
+                ticket_status=self.ticket_status,
+                budget_remaining=self.budget_remaining
+            )
+            breakdown.total = round(breakdown.total + term_reward, 4)
+            self.episode_log[-1]["terminal_reward"] = term_reward
+
         # 15. Return
         return (
             self._build_observation(),
@@ -366,6 +494,7 @@ class OpenInboxEnv:
         Return a full snapshot of the environment's internal state.
 
         Useful for the /state API endpoint and for debugging.
+        internal_reliability is included here (debug/logging) but NOT in observation.
         """
         return {
             "task_id": self.task_id,
@@ -377,6 +506,8 @@ class OpenInboxEnv:
             "team_queues": dict(self.team_queues),
             "sla_timers": dict(self.sla_timers),
             "sla_at_risk": self._sla_at_risk(),
+            "budget_remaining": self.budget_remaining,
+            "internal_reliability": dict(self.internal_reliability),  # debug only — not in obs
             "done": self.done,
             "env_injection_flags": self.env_injection_flags,
             "episode_log": self.episode_log,
@@ -393,6 +524,24 @@ class OpenInboxEnv:
         # When context is locked the agent can no longer see thread history.
         # This is the consequence of choosing Option A (escalate for safety).
         visible_history = [] if self.context_locked else list(self.thread_history)
+
+        # Expose reliability as boolean flags only — never expose raw scores.
+        # This prevents the agent from memorising exact cost/accuracy numbers.
+        fast_degraded      = self.internal_reliability.get("delegate_fast", 1.0)      < _DEGRADED_THRESHOLD
+        thorough_degraded  = self.internal_reliability.get("delegate_thorough", 1.0)  < _DEGRADED_THRESHOLD
+        any_team_degraded  = fast_degraded or thorough_degraded
+
+        del_hist = {
+            "team_A_recent":   self.delegation_history.get("delegate_fast", [])[-3:],
+            "team_B_recent":   self.delegation_history.get("delegate_thorough", [])[-3:],
+            "handle_self_recent": self.delegation_history.get("handle_self", [])[-3:],
+            "escalate_recent": self.delegation_history.get("escalate", [])[-3:],
+            "team_A_uses":     len(self.delegation_history.get("delegate_fast", [])),
+            "team_B_uses":     len(self.delegation_history.get("delegate_thorough", [])),
+            "handle_self_uses": len(self.delegation_history.get("handle_self", [])),
+            "escalate_uses":   len(self.delegation_history.get("escalate", [])),
+        }
+
         return Observation(
             current_email=self.current_email,
             thread_history=visible_history,
@@ -403,12 +552,16 @@ class OpenInboxEnv:
             max_steps=self.max_steps,
             task_id=self.task_id,
             flags={
-                "sla_at_risk": self._sla_at_risk(),
-                # has_injection reflects the NEW current_email (already swapped)
-                "injection_in_current_email": self.current_email.has_injection,
-                "context_locked": self.context_locked,
-                "tradeoff_risk": self.tradeoff_risk,
+                "sla_at_risk":                  self._sla_at_risk(),
+                "injection_in_current_email":   self.current_email.has_injection,
+                "context_locked":               self.context_locked,
+                "tradeoff_risk":                self.tradeoff_risk,
+                # Reliability degradation flags (boolean only — no raw scores exposed)
+                "fast_team_degraded":           fast_degraded,
+                "thorough_team_degraded":       thorough_degraded,
+                "any_team_degraded":            any_team_degraded,
             },
+            delegation_history=del_hist,
         )
 
     def _sla_at_risk(self) -> bool:
@@ -418,27 +571,142 @@ class OpenInboxEnv:
             return False
         return any(v <= threshold for v in self.sla_timers.values())
 
+    def _drift_team_reliability(self) -> None:
+        """Dynamic team reliability drift based on episode seed. (Phase 1B)"""
+        # Use a deterministic rng based on episode seed and current step
+        rng = random.Random(f"{self.episode_seed}_{self.step_count}")
+
+        if self.step_count == 7:
+            # delegate_fast multiplied by random value between 0.70 and 1.10
+            # clipped to range 0.40 to 0.95
+            factor = rng.uniform(0.70, 1.10)
+            new_val = self.internal_reliability.get("delegate_fast", 1.00) * factor
+            new_val = max(0.40, min(0.95, new_val))
+            self.internal_reliability["delegate_fast"] = round(new_val, 4)
+
+        elif self.step_count == 14:
+            # 15% probability delegate_thorough accuracy reduces by 35%
+            if rng.random() < 0.15:
+                current = self.internal_reliability.get("delegate_thorough", 1.00)
+                self.internal_reliability["delegate_thorough"] = round(current * 0.65, 4)
+
+    def _auto_resolve(self, action: Action, step_idx: int) -> tuple[Observation, float, bool, dict]:
+        """Phase 1C: Handles automatic resolution of tickets due to patient waiting."""
+        self.ticket_status = "resolved"
+        self.open_tickets = 0
+
+        # Create a system follow-up confirming the auto-resolution
+        followup_raw = {
+            "id": f"{self.current_email.id}_auto_resolved",
+            "thread_id": self.thread_id,
+            "sender": "system@internal",
+            "subject": f"Re: {self.current_email.subject}",
+            "body": "This ticket was automatically resolved by the external party. No further action is required.",
+            "timestamp": self.current_email.timestamp,
+            "has_injection": False,
+            "step_index": step_idx,
+            "is_confirmation": True,
+        }
+
+        # Advance to the new email
+        new_email = self._advance_email(followup_raw, step_idx)
+        self.current_email = new_email
+
+        # Give outcome reward: patience bonus for successful auto-resolve wait
+        breakdown = RewardBreakdown(
+            wait_bonus=0.10,
+            total=0.10
+        )
+
+        self._append_log(action, breakdown, step_idx)
+        self.episode_log[-1]["resolution_type"] = "auto"
+
+        self.prev_action = action
+        self.step_count += 1
+        self.done = True
+
+        # Phase 1D: Add terminal outcome reward
+        gt = self._resolve_step_ground_truth(step_idx)
+        term_reward = reward_module.terminal_outcome_reward(
+            action=action,
+            ground_truth=gt,
+            ticket_status=self.ticket_status,
+            budget_remaining=self.budget_remaining
+        )
+        breakdown.total = round(breakdown.total + term_reward, 4)
+        self.episode_log[-1]["terminal_reward"] = term_reward
+
+        return (
+            self._build_observation(),
+            breakdown.total,
+            self.done,
+            self._build_info(breakdown),
+        )
+
+    def _resolve_internal_team(self, action: Action, step_idx: int) -> Optional[str]:
+        """
+        Map the abstract action route_to to the legacy internal team name
+        used as the key in threads.json followups.
+
+        For delegate_fast / delegate_thorough, we prefer the team that matches
+        the ground-truth route so the authored followup content makes sense.
+        If no GT team is available, we fall back to the default for that action.
+        """
+        if action.route_to == "wait":
+            return None  # no followup for wait
+
+        if action.route_to == "escalate":
+            return "unknown"  # escalation uses the unknown fallback path
+
+        if action.route_to == "handle_self":
+            return "spam_filter"
+
+        gt = self._resolve_step_ground_truth(step_idx)
+        gt_route = gt.get("route_to", "")
+
+        if action.route_to == "delegate_fast":
+            return gt_route if gt_route in _FAST_TEAMS else "billing_team"
+
+        if action.route_to == "delegate_thorough":
+            return gt_route if gt_route in _THOROUGH_TEAMS else "legal_team"
+
+        return _ACTION_DEFAULT_TEAM.get(action.route_to, "unknown")
+
     def _load_followup(self, action: Action, step_idx: int) -> dict:
         """
         Look up the pre-authored follow-up for this routing decision.
 
-        For task_hard, follow-ups are indexed by step number and team name:
-          "step2_legal_team" -> the legal team's response at step 2
-          "step2_default"    -> fallback if the specific team key is missing
-        For task_easy and task_medium, the key is just the team name:
-          "billing_team", "tech_team", etc.
-        Falls back to "unknown" for any unrecognized route.
+        Abstract actions are first resolved to internal team names via
+        _resolve_internal_team(), then the legacy key lookup proceeds.
+
+        For the wait action, returns a neutral "no-op" dict so the
+        email chain does not advance (agent sees the same email again).
         """
+        # wait: return neutral followup — same email content, not a confirmation
+        if action.route_to == "wait":
+            return {
+                "id":            f"{self.current_email.id}_wait",
+                "thread_id":     self.thread_id,
+                "sender":        "system@internal",
+                "subject":       f"[WAITING] {self.current_email.subject}",
+                "body":          "No action taken this step. Teams are being given time to clear their queues.",
+                "timestamp":     self.current_email.timestamp,
+                "has_injection": False,
+                "step_index":    step_idx,
+                "is_confirmation": False,
+            }
+
+        internal_team = self._resolve_internal_team(action, step_idx)
         followups = self.thread["followups"]
 
         if self.task_id == "task_hard":
-            key = f"step{step_idx}_{action.route_to}"
+            key = f"step{step_idx}_{internal_team}"
             if key not in followups:
                 key = f"step{step_idx}_default"
             if key not in followups:
                 key = "unknown"
         else:
-            key = action.route_to
+            key = internal_team if internal_team else "unknown"
             if key not in followups:
                 key = "unknown"
 

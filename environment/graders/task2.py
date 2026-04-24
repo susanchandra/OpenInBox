@@ -11,7 +11,7 @@ doesn't pick the exact right label.
 
 Weight table (weights sum to 1.00):
   classification  0.25  exact match
-  routing         0.20  exact match
+  routing         0.20  abstract-action match (delegate_fast/thorough/handle_self/escalate)
   extraction      0.20  token F1
   priority        0.20  full credit for exact, half credit if one level off
   sla_urgency     0.15  did the agent pick high or critical at all?
@@ -24,6 +24,25 @@ They measure different things — correctness vs urgency awareness.
 from environment.graders.base import exact_match, token_f1
 
 _PRIORITY_ORDER = ["low", "medium", "high", "critical"]
+
+# Abstract-action → set of legacy GT team names that count as correct
+_FAST_TEAMS      = {"billing_team", "tech_team"}
+_THOROUGH_TEAMS  = {"legal_team", "hr_team", "compliance_team"}
+_SELF_TEAMS      = {"spam_filter"}
+
+
+def _routing_correct(agent_route: str, gt_route: str,
+                     gt_requires_escalation: bool = False) -> float:
+    """Return 1.0 if the abstract action maps to the GT team, else 0.0."""
+    if agent_route == "delegate_fast":
+        return 1.0 if gt_route in _FAST_TEAMS else 0.0
+    if agent_route == "delegate_thorough":
+        return 1.0 if gt_route in _THOROUGH_TEAMS else 0.0
+    if agent_route == "handle_self":
+        return 1.0 if gt_route in _SELF_TEAMS else 0.0
+    if agent_route == "escalate":
+        return 1.0 if gt_requires_escalation else 0.0
+    return 0.0  # wait or unknown → no routing credit
 
 
 def grade(episode_log: list[dict], ground_truth: dict) -> dict:
@@ -52,9 +71,13 @@ def grade(episode_log: list[dict], ground_truth: dict) -> dict:
     if missing_action:
         return {"score": 0.0, "breakdown": {"error": f"action missing keys: {missing_action}"}}
 
-    # Classification and routing — exact match only
+    # Classification and routing — exact/abstract match
     c_score = exact_match(action["classification"], ground_truth["classification"])
-    r_score = exact_match(action["route_to"], ground_truth["route_to"])
+    r_score = _routing_correct(
+        action["route_to"],
+        ground_truth["route_to"],
+        ground_truth.get("requires_escalation", False),
+    )
 
     # Field extraction — token F1
     e_score = token_f1(

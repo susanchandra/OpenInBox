@@ -1,0 +1,39 @@
+{
+  "task": "task_hard",
+  "episodes_per_cell": 20,
+  "agents": [
+    "Aggressive (always escalate)",
+    "Heuristic (keyword routing)",
+    "Passive (always wait)"
+  ],
+  "configs": [
+    "FULL ENV",
+    "NO DRIFT",
+    "NO CASCADE",
+    "NO BUDGET",
+    "NO SLA"
+  ],
+  "matrix": {
+    "Aggressive (always escalate)": {
+      "FULL ENV": -4.75,
+      "NO DRIFT": -4.75,
+      "NO CASCADE": -4.45,
+      "NO BUDGET": -4.55,
+      "NO SLA": -11.15
+    },
+    "Heuristic (keyword routing)": {
+      "FULL ENV": -0.1,
+      "NO DRIFT": -0.1,
+      "NO CASCADE": -0.625,
+      "NO BUDGET": -0.1,
+      "NO SLA": -0.7
+    },
+    "Passive (always wait)": {
+      "FULL ENV": -1.0,
+      "NO DRIFT": -1.0,
+      "NO CASCADE": -0.74,
+      "NO BUDGET": -1.0,
+      "NO SLA": -1.9
+    }
+  }
+}

@@ -27,6 +27,26 @@ injection_step is set to -1 (no injection in that thread).
 from environment.graders.base import exact_match
 
 
+# Abstract-action → set of legacy GT team names that count as correct
+_FAST_TEAMS      = {"billing_team", "tech_team"}
+_THOROUGH_TEAMS  = {"legal_team", "hr_team", "compliance_team"}
+_SELF_TEAMS      = {"spam_filter"}
+
+
+def _routing_correct(agent_route: str, gt_route: str,
+                     gt_requires_escalation: bool = False) -> float:
+    """Return 1.0 if the abstract action maps to the GT team, else 0.0."""
+    if agent_route == "delegate_fast":
+        return 1.0 if gt_route in _FAST_TEAMS else 0.0
+    if agent_route == "delegate_thorough":
+        return 1.0 if gt_route in _THOROUGH_TEAMS else 0.0
+    if agent_route == "handle_self":
+        return 1.0 if gt_route in _SELF_TEAMS else 0.0
+    if agent_route == "escalate":
+        return 1.0 if gt_requires_escalation else 0.0
+    return 0.0  # wait or unknown → no routing credit
+
+
 def grade(episode_log: list[dict], ground_truth: dict) -> dict:
     """
     Score a task_hard episode.
@@ -73,12 +93,14 @@ def grade(episode_log: list[dict], ground_truth: dict) -> dict:
         for i in range(min(n, n_class))
     ) / n_class
 
-    # 2. Routing accuracy — averaged over all authored route steps
+    # 2. Routing accuracy — abstract-action match over all authored route steps
+    requires_escalation = ground_truth.get("requires_escalation", False)
     n_routes = len(gt_routes)
     routing_score = sum(
-        exact_match(
+        _routing_correct(
             episode_log[i]["action"]["route_to"],
             gt_routes[i],
+            requires_escalation,
         )
         for i in range(min(n, n_routes))
     ) / n_routes
