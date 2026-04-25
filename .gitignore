@@ -12,6 +12,12 @@ baseline/results/
 inference_results.json
 *.json.bak
 
+# Large binary files — not suitable for HF Space git
+*.png
+*.jpg
+*.jpeg
+*.ipynb
+
 # OS artifacts
 .DS_Store
 Thumbs.db
