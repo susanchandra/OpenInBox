@@ -1,0 +1,1016 @@
+[
+  {
+    "config_name": "FULL ENV (all features)",
+    "avg_reward": 0.025,
+    "avg_steps": 6.2,
+    "success_rate": 50.0,
+    "avg_budget_remaining": 1.0,
+    "episodes": [
+      {
+        "seed": 0,
+        "total_reward": -1.3,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 1,
+        "total_reward": -1.2,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 2,
+        "total_reward": 1.3,
+        "steps": 5,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 3,
+        "total_reward": 1.3,
+        "steps": 4,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 4,
+        "total_reward": -1.3,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 5,
+        "total_reward": -1.2,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 6,
+        "total_reward": 1.3,
+        "steps": 5,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 7,
+        "total_reward": 1.3,
+        "steps": 4,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 8,
+        "total_reward": -1.3,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 9,
+        "total_reward": -1.2,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 10,
+        "total_reward": 1.3,
+        "steps": 5,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 11,
+        "total_reward": 1.3,
+        "steps": 4,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 12,
+        "total_reward": -1.3,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 13,
+        "total_reward": -1.2,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 14,
+        "total_reward": 1.3,
+        "steps": 5,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 15,
+        "total_reward": 1.3,
+        "steps": 4,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 16,
+        "total_reward": -1.3,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 17,
+        "total_reward": -1.2,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 18,
+        "total_reward": 1.3,
+        "steps": 5,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 19,
+        "total_reward": 1.3,
+        "steps": 4,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      }
+    ]
+  },
+  {
+    "config_name": "NO DRIFT (remove reliability drift)",
+    "avg_reward": 0.025,
+    "avg_steps": 6.2,
+    "success_rate": 50.0,
+    "avg_budget_remaining": 1.0,
+    "episodes": [
+      {
+        "seed": 0,
+        "total_reward": -1.3,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 1,
+        "total_reward": -1.2,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 2,
+        "total_reward": 1.3,
+        "steps": 5,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 3,
+        "total_reward": 1.3,
+        "steps": 4,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 4,
+        "total_reward": -1.3,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 5,
+        "total_reward": -1.2,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 6,
+        "total_reward": 1.3,
+        "steps": 5,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 7,
+        "total_reward": 1.3,
+        "steps": 4,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 8,
+        "total_reward": -1.3,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 9,
+        "total_reward": -1.2,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 10,
+        "total_reward": 1.3,
+        "steps": 5,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 11,
+        "total_reward": 1.3,
+        "steps": 4,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 12,
+        "total_reward": -1.3,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 13,
+        "total_reward": -1.2,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 14,
+        "total_reward": 1.3,
+        "steps": 5,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 15,
+        "total_reward": 1.3,
+        "steps": 4,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 16,
+        "total_reward": -1.3,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 17,
+        "total_reward": -1.2,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 18,
+        "total_reward": 1.3,
+        "steps": 5,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 19,
+        "total_reward": 1.3,
+        "steps": 4,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      }
+    ]
+  },
+  {
+    "config_name": "NO CASCADE (remove delayed consequences)",
+    "avg_reward": -0.35,
+    "avg_steps": 7.2,
+    "success_rate": 25.0,
+    "avg_budget_remaining": 1.0,
+    "episodes": [
+      {
+        "seed": 0,
+        "total_reward": -1.0,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 1,
+        "total_reward": -1.1,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 2,
+        "total_reward": 1.6,
+        "steps": 5,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 3,
+        "total_reward": -0.9,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 4,
+        "total_reward": -1.0,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 5,
+        "total_reward": -1.1,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 6,
+        "total_reward": 1.6,
+        "steps": 5,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 7,
+        "total_reward": -0.9,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 8,
+        "total_reward": -1.0,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 9,
+        "total_reward": -1.1,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 10,
+        "total_reward": 1.6,
+        "steps": 5,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 11,
+        "total_reward": -0.9,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 12,
+        "total_reward": -1.0,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 13,
+        "total_reward": -1.1,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 14,
+        "total_reward": 1.6,
+        "steps": 5,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 15,
+        "total_reward": -0.9,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 16,
+        "total_reward": -1.0,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 17,
+        "total_reward": -1.1,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 18,
+        "total_reward": 1.6,
+        "steps": 5,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 19,
+        "total_reward": -0.9,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      }
+    ]
+  },
+  {
+    "config_name": "NO BUDGET (remove escalation cost)",
+    "avg_reward": 0.025,
+    "avg_steps": 6.2,
+    "success_rate": 50.0,
+    "avg_budget_remaining": 1.0,
+    "episodes": [
+      {
+        "seed": 0,
+        "total_reward": -1.3,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 1,
+        "total_reward": -1.2,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 2,
+        "total_reward": 1.3,
+        "steps": 5,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 3,
+        "total_reward": 1.3,
+        "steps": 4,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 4,
+        "total_reward": -1.3,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 5,
+        "total_reward": -1.2,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 6,
+        "total_reward": 1.3,
+        "steps": 5,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 7,
+        "total_reward": 1.3,
+        "steps": 4,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 8,
+        "total_reward": -1.3,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 9,
+        "total_reward": -1.2,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 10,
+        "total_reward": 1.3,
+        "steps": 5,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 11,
+        "total_reward": 1.3,
+        "steps": 4,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 12,
+        "total_reward": -1.3,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 13,
+        "total_reward": -1.2,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 14,
+        "total_reward": 1.3,
+        "steps": 5,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 15,
+        "total_reward": 1.3,
+        "steps": 4,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 16,
+        "total_reward": -1.3,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 17,
+        "total_reward": -1.2,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 18,
+        "total_reward": 1.3,
+        "steps": 5,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 19,
+        "total_reward": 1.3,
+        "steps": 4,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      }
+    ]
+  },
+  {
+    "config_name": "NO SLA (remove time pressure)",
+    "avg_reward": -0.625,
+    "avg_steps": 12.2,
+    "success_rate": 50.0,
+    "avg_budget_remaining": 1.0,
+    "episodes": [
+      {
+        "seed": 0,
+        "total_reward": -2.6,
+        "steps": 20,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 1,
+        "total_reward": -2.5,
+        "steps": 20,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 2,
+        "total_reward": 1.3,
+        "steps": 5,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 3,
+        "total_reward": 1.3,
+        "steps": 4,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 4,
+        "total_reward": -2.6,
+        "steps": 20,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 5,
+        "total_reward": -2.5,
+        "steps": 20,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 6,
+        "total_reward": 1.3,
+        "steps": 5,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 7,
+        "total_reward": 1.3,
+        "steps": 4,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 8,
+        "total_reward": -2.6,
+        "steps": 20,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 9,
+        "total_reward": -2.5,
+        "steps": 20,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 10,
+        "total_reward": 1.3,
+        "steps": 5,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 11,
+        "total_reward": 1.3,
+        "steps": 4,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 12,
+        "total_reward": -2.6,
+        "steps": 20,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 13,
+        "total_reward": -2.5,
+        "steps": 20,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 14,
+        "total_reward": 1.3,
+        "steps": 5,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 15,
+        "total_reward": 1.3,
+        "steps": 4,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 16,
+        "total_reward": -2.6,
+        "steps": 20,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 17,
+        "total_reward": -2.5,
+        "steps": 20,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 18,
+        "total_reward": 1.3,
+        "steps": 5,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 19,
+        "total_reward": 1.3,
+        "steps": 4,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      }
+    ]
+  },
+  {
+    "config_name": "NO INJECTION (remove adversarial input)",
+    "avg_reward": 0.075,
+    "avg_steps": 6.2,
+    "success_rate": 50.0,
+    "avg_budget_remaining": 1.0,
+    "episodes": [
+      {
+        "seed": 0,
+        "total_reward": -1.3,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 1,
+        "total_reward": -1.0,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 2,
+        "total_reward": 1.3,
+        "steps": 5,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 3,
+        "total_reward": 1.3,
+        "steps": 4,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 4,
+        "total_reward": -1.3,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 5,
+        "total_reward": -1.0,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 6,
+        "total_reward": 1.3,
+        "steps": 5,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 7,
+        "total_reward": 1.3,
+        "steps": 4,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 8,
+        "total_reward": -1.3,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 9,
+        "total_reward": -1.0,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 10,
+        "total_reward": 1.3,
+        "steps": 5,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 11,
+        "total_reward": 1.3,
+        "steps": 4,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 12,
+        "total_reward": -1.3,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 13,
+        "total_reward": -1.0,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 14,
+        "total_reward": 1.3,
+        "steps": 5,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 15,
+        "total_reward": 1.3,
+        "steps": 4,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 16,
+        "total_reward": -1.3,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 17,
+        "total_reward": -1.0,
+        "steps": 8,
+        "success": false,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 18,
+        "total_reward": 1.3,
+        "steps": 5,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      },
+      {
+        "seed": 19,
+        "total_reward": 1.3,
+        "steps": 4,
+        "success": true,
+        "escalations": 0,
+        "budget_remaining": 1.0
+      }
+    ]
+  }
+]

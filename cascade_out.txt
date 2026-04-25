@@ -1,0 +1,40 @@
+﻿============================================================
+[DEMO: CASCADE TRIGGER] ù deterministic, no LLM
+============================================================
+Thread: thread_hard_001 | Task: task_hard | Seed: 0
+
+Step 1:
+  From   : r.mackenzie@globalshipping.com
+  Subject: Disputed charge on account #5523 ù $4,750 unauthorized
+  Action : route_to=billing_team, escalate=False
+  Reward : 0.4500
+
+Step 2:
+  From   : r.mackenzie@globalshipping.com
+  Subject: Re: Disputed charge on account #5523 ù second notice
+  Action : route_to=hr_team, escalate=False
+  Reward : 0.2500
+
+Step 3:
+  From   : r.mackenzie@globalshipping.com
+  Subject: Re: Disputed charge on account #5523 ù escalating to legal
+  Action : route_to=legal_team, escalate=False
+  Reward : 0.6500
+
+Step 4:
+  From   : director@globalshipping.com
+  Subject: ESCALATION ù Management involvement: account #5523 dispute unresolved
+  *** CASCADE EMAIL INJECTED *** (wrong routing at step 1 caused this)
+  Action : route_to=billing_team, escalate=False
+  Reward : -0.2000 [cascade_penalty=-0.2]
+
+Step 5:
+  From   : noreply@internal.company.com
+  Subject: Re: Formal legal notice ù account #5523
+  Action : route_to=legal_team, escalate=True
+  Reward : 0.5500
+
+Cascade steps triggered: [3]
+Episode log steps      : 5
+============================================================
+
