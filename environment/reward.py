@@ -4,22 +4,36 @@ Per-step reward computation for OpenInbox.
 Called once per step from env.py. All weights are fixed — no randomness.
 The total is clamped to [-1.0, 1.0].
 
-Weight table:
-  classification_reward   +0.25   correct classification
-  routing_reward          +0.20   correct team
-  extraction_reward       +0.20   token F1 across extracted fields
-  priority_reward         +0.15   exact match, +0.05 if adjacent level
-  sla_bonus               +0.10   high/critical priority when SLA is at risk
-  injection_reward        +0.20   flagged injection correctly  (task_hard only)
-  injection_penalty       -0.20   missed injection             (task_hard only)
-  false_positive_penalty  -0.05   flagged injection when none  (task_hard only)
-  escalation_penalty      -0.15   escalated when not warranted
-  repeat_penalty          -0.10   identical action as previous step
-  sla_breach_penalty      -0.30   terminal step when SLA breach occurs
-  cascade_penalty         -0.20   wrong routing on a cascade-triggered step (task_hard only)
-  correction_bonus        +0.15   correct routing on a cascade-triggered step (task_hard only)
+=== LOCKED PER-STEP COMPONENTS (Phase 1D — 4 signals only) ===
+  budget_penalty        -0.40   escalate action cost (always applied when escalating)
+  sla_urgency           +0.10   high/critical priority when SLA is at risk
+  cascade_penalty       -0.20   wrong routing on a cascade-triggered step (task_hard only)
+  repeat_penalty        -0.10   identical action as previous step
+
+=== LOGGED ONLY — NOT SUMMED INTO total (computed for grading/debug) ===
+  escalation_penalty    -0.15   escalated when not warranted
+  injection_reward      +0.20   flagged injection correctly  (task_hard only)
+  injection_penalty     -0.20   missed injection             (task_hard only)
+  false_positive_penalty -0.05  flagged injection when none  (task_hard only)
+  sla_breach_penalty    -0.30   terminal step when SLA breach occurs
+  drift_routing_penalty -0.10   routing to a reliability-degraded team
+  wait_bonus            +0.15   strategic wait when ≥1 team is degraded and SLA not at risk
+  correction_bonus      +0.15   correct routing on a cascade-triggered step (task_hard only)
+
+=== BANNED FROM PER-STEP TOTAL (removed in Phase 1D) ===
+  classification_reward  +0.25  logged for grader debugging, NOT in total
+  routing_reward         +0.20  logged for grader debugging, NOT in total
+  extraction_reward      +0.20  logged for grader debugging, NOT in total
+  priority_reward        +0.15  logged for grader debugging, NOT in total
 
 Note: priority is not scored in task_hard (ground_truth has empty priority string).
+
+=== INTERNAL ACTION→TEAM MAPPING ===
+  handle_self      → spam_filter   (exact GT match: spam_filter)
+  delegate_fast    → billing_team / tech_team  (GT match: either)
+  delegate_thorough → legal_team / hr_team     (GT match: either)
+  escalate         → requires_escalation==True
+  wait             → never a correct route (no routing credit)
 """
 
 import re
@@ -30,6 +44,11 @@ from environment.models import Action, RewardBreakdown
 
 # Priority levels in order from lowest to highest.
 _PRIORITY_ORDER = ["low", "medium", "high", "critical"]
+
+# Abstract-action → set of internal GT team names that count as correct routing
+_FAST_TEAMS = {"billing_team", "tech_team"}
+_THOROUGH_TEAMS = {"legal_team", "hr_team", "compliance_team"}
+_SELF_TEAMS = {"spam_filter"}
 
 
 def compute(
@@ -42,12 +61,16 @@ def compute(
     sla_breach: bool = False,
     cascade_step: bool = False,
     corrected_cascade: bool = False,
+    any_team_degraded: bool = False,
 ) -> RewardBreakdown:
     """
     Compute the reward for one step.
 
     ground_truth is already resolved to a per-step dict by env.py,
     so this function never touches list-type ground truth directly.
+
+    any_team_degraded: True when ≥1 team's reliability has drifted below threshold.
+                       Used to determine wait_bonus eligibility.
     """
     r = RewardBreakdown()
 
@@ -57,25 +80,24 @@ def compute(
     gt_priority = ground_truth.get("priority", "")
     gt_requires_escalation = ground_truth.get("requires_escalation", False)
 
-    # Correct classification
-    if gt_classification and action.classification == gt_classification:
-        r.classification_reward = 0.25
+    # Normalise escalate: route_to=="escalate" is treated as escalating regardless of bool
+    is_escalating = (action.route_to == "escalate") or action.escalate
 
-    # Correct routing
-    if gt_route and action.route_to == gt_route:
-        r.routing_reward = 0.20
+    # -----------------------------------------------------------------------
+    # PER-STEP components (these ARE added to total)
+    # -----------------------------------------------------------------------
 
-    # Field extraction quality — token F1 across all ground-truth fields
-    if gt_fields:
-        r.extraction_reward = round(token_f1(action.extracted_fields, gt_fields) * 0.20, 4)
-
-    # Priority scoring — only when ground truth has a priority set
-    if gt_priority:
-        r.priority_reward = _priority_score(action.priority, gt_priority)
+    # Budget penalty — escalate costs 0.40 regardless of correctness
+    if is_escalating:
+        r.budget_penalty = -0.40
 
     # SLA urgency bonus — agent correctly identified that this needs urgent attention
     if sla_at_risk and action.priority in {"high", "critical"}:
-        r.sla_bonus = 0.10
+        r.sla_urgency = 0.10
+
+    # Unnecessary escalation (stacks with budget_penalty for a double disincentive)
+    if is_escalating and not gt_requires_escalation:
+        r.escalation_penalty = -0.15
 
     # Injection signals — task_hard only
     if task_id == "task_hard":
@@ -87,10 +109,6 @@ def compute(
         else:
             if action.flag_injection:
                 r.false_positive_penalty = -0.05
-
-    # Unnecessary escalation
-    if action.escalate and not gt_requires_escalation:
-        r.escalation_penalty = -0.15
 
     # Repeat action — penalise the agent for not changing anything
     if prev_action is not None and _actions_identical(action, prev_action):
@@ -107,23 +125,67 @@ def compute(
         else:
             r.cascade_penalty = -0.20
 
-    components = [
-        r.classification_reward,
-        r.routing_reward,
-        r.extraction_reward,
-        r.priority_reward,
-        r.sla_bonus,
-        r.escalation_penalty,
-        r.injection_reward,
-        r.injection_penalty,
-        r.false_positive_penalty,
-        r.repeat_penalty,
-        r.sla_breach_penalty,
+    # Reliability drift penalty — routing to a team whose reliability has degraded
+    # Only applies to actual delegation/routing actions, not wait or escalate
+    if any_team_degraded and action.route_to in {"delegate_fast", "delegate_thorough", "handle_self"}:
+        r.drift_routing_penalty = -0.10
+
+    # Wait bonus — strategic wait when ≥1 team degraded and time permits
+    if action.route_to == "wait" and any_team_degraded and not sla_at_risk:
+        r.wait_bonus = 0.15
+
+    # -----------------------------------------------------------------------
+    # Sum ONLY the four permitted per-step components (Phase 1D locked spec).
+    # All other signals above are computed and stored for logging/grading only.
+    # -----------------------------------------------------------------------
+    per_step_components = [
+        r.budget_penalty,
+        r.sla_urgency,
         r.cascade_penalty,
-        r.correction_bonus,
+        r.repeat_penalty,
     ]
-    r.total = round(max(-1.0, min(1.0, sum(components))), 4)
+    r.total = round(max(-1.0, min(1.0, sum(per_step_components))), 4)
     return r
+
+
+def terminal_outcome_reward(
+    action: Action,
+    ground_truth: dict,
+    ticket_status: str,
+    budget_remaining: float,
+) -> float:
+    """
+    Fires ONLY when a task is fully resolved (end of episode).
+    """
+    total = 0.0
+
+    # Base resolution outcome
+    if ticket_status == "resolved":
+        total += 1.0
+        total += 0.30  # SLA met at resolution
+    else:
+        total -= 1.0
+
+    # Classification correctness
+    gt_classification = ground_truth.get("classification", "")
+    if gt_classification and action.classification == gt_classification:
+        total += 0.20
+
+    # Extraction correctness
+    gt_fields = ground_truth.get("extracted_fields", {})
+    if gt_fields:
+        total += round(token_f1(action.extracted_fields, gt_fields) * 0.15, 4)
+
+    # Priority correctness
+    gt_priority = ground_truth.get("priority", "")
+    if gt_priority and action.priority == gt_priority:
+        total += 0.10
+
+    # Budget conservation
+    if budget_remaining > 0.20:
+        total += 0.20
+
+    return round(total, 4)
 
 
 def token_f1(predicted: dict[str, str], ground: dict[str, str]) -> float:

@@ -20,7 +20,7 @@ def _action(**kwargs) -> Action:
     defaults = {
         "classification": "billing",
         "priority": "medium",
-        "route_to": "billing_team",
+        "route_to": "delegate_fast",
         "extracted_fields": {},
         "escalate": False,
         "flag_injection": False,
@@ -34,7 +34,7 @@ def _gt(**kwargs) -> dict:
     defaults = {
         "classification": "billing",
         "priority": "medium",
-        "route_to": "billing_team",
+        "route_to": "billing_team",   # GT still uses legacy team names
         "extracted_fields": {},
         "requires_escalation": False,
     }
@@ -99,47 +99,37 @@ class TestPriorityScore:
 
 class TestRewardComponents:
 
-    def test_correct_classification_gives_reward(self):
-        r = compute(_action(classification="billing"), None, _gt(classification="billing"),
-                    False, False, "task_easy")
-        assert r.classification_reward == 0.25
-
-    def test_wrong_classification_gives_zero(self):
-        r = compute(_action(classification="spam"), None, _gt(classification="billing"),
-                    False, False, "task_easy")
-        assert r.classification_reward == 0.0
-
-    def test_correct_routing_gives_reward(self):
-        r = compute(_action(route_to="billing_team"), None,
-                    _gt(route_to="billing_team"), False, False, "task_easy")
-        assert r.routing_reward == 0.20
-
-    def test_wrong_routing_gives_zero(self):
-        r = compute(_action(route_to="hr_team"), None,
-                    _gt(route_to="billing_team"), False, False, "task_easy")
-        assert r.routing_reward == 0.0
-
-    def test_sla_bonus_triggers_correctly(self):
+    def test_sla_urgency_triggers_correctly(self):
         r = compute(_action(priority="high"), None, _gt(), True, True, "task_easy")
-        assert r.sla_bonus == 0.10
+        assert r.sla_urgency == 0.10
 
-    def test_sla_bonus_not_given_for_low_priority(self):
+    def test_sla_urgency_not_given_for_low_priority(self):
         r = compute(_action(priority="low"), None, _gt(), True, True, "task_easy")
-        assert r.sla_bonus == 0.0
+        assert r.sla_urgency == 0.0
 
-    def test_sla_bonus_not_given_when_not_at_risk(self):
+    def test_sla_urgency_not_given_when_not_at_risk(self):
         r = compute(_action(priority="critical"), None, _gt(), False, False, "task_easy")
-        assert r.sla_bonus == 0.0
+        assert r.sla_urgency == 0.0
 
     def test_unnecessary_escalation_penalty(self):
-        r = compute(_action(escalate=True), None,
+        # escalate via route_to: triggers both budget_penalty and escalation_penalty
+        r = compute(_action(route_to="escalate"), None,
                     _gt(requires_escalation=False), False, False, "task_easy")
         assert r.escalation_penalty == -0.15
+        assert r.budget_penalty == -0.40
 
-    def test_warranted_escalation_no_penalty(self):
-        r = compute(_action(escalate=True), None,
+    def test_warranted_escalation_no_extra_penalty(self):
+        # Warranted: budget_penalty still applies but escalation_penalty does NOT
+        r = compute(_action(route_to="escalate"), None,
                     _gt(requires_escalation=True), False, False, "task_easy")
         assert r.escalation_penalty == 0.0
+        assert r.budget_penalty == -0.40
+
+    def test_budget_penalty_applies_on_escalate_bool(self):
+        # escalate=True (bool) also triggers budget_penalty
+        r = compute(_action(route_to="delegate_fast", escalate=True), None,
+                    _gt(requires_escalation=False), False, False, "task_easy")
+        assert r.budget_penalty == -0.40
 
     def test_repeat_action_penalty(self):
         action = _action()
@@ -159,6 +149,34 @@ class TestRewardComponents:
     def test_no_sla_breach_no_penalty(self):
         r = compute(_action(), None, _gt(), False, False, "task_easy", sla_breach=False)
         assert r.sla_breach_penalty == 0.0
+
+    def test_drift_routing_penalty_when_team_degraded(self):
+        # Routing to delegate_fast when any_team_degraded=True → penalty
+        r = compute(_action(route_to="delegate_fast"), None, _gt(),
+                    False, False, "task_easy", any_team_degraded=True)
+        assert r.drift_routing_penalty == -0.10
+
+    def test_no_drift_penalty_when_not_degraded(self):
+        r = compute(_action(route_to="delegate_fast"), None, _gt(),
+                    False, False, "task_easy", any_team_degraded=False)
+        assert r.drift_routing_penalty == 0.0
+
+    def test_wait_bonus_when_degraded_and_sla_safe(self):
+        # wait + any_team_degraded=True + sla_at_risk=False → bonus
+        r = compute(_action(route_to="wait"), None, _gt(),
+                    False, False, "task_easy", any_team_degraded=True)
+        assert r.wait_bonus == 0.15
+
+    def test_no_wait_bonus_when_sla_at_risk(self):
+        # wait is NOT strategic when SLA is ticking down
+        r = compute(_action(route_to="wait"), None, _gt(),
+                    True, True, "task_easy", any_team_degraded=True)
+        assert r.wait_bonus == 0.0
+
+    def test_no_wait_bonus_when_no_degradation(self):
+        r = compute(_action(route_to="wait"), None, _gt(),
+                    False, False, "task_easy", any_team_degraded=False)
+        assert r.wait_bonus == 0.0
 
 
 # ---------------------------------------------------------------------------
@@ -207,11 +225,13 @@ class TestInjectionReward:
 class TestTotalClamping:
 
     def test_total_clamped_at_positive_one(self):
-        # Force a very high positive by combining all bonuses
+        # Phase 1D: only 4 signals sum into total.
+        # Max positive from allowed signals: sla_urgency (+0.10).
+        # injection_reward and correction_bonus are logged-only now.
         action = _action(
             classification="billing",
             priority="high",
-            route_to="billing_team",
+            route_to="delegate_fast",
             flag_injection=True,
         )
         gt = _gt(
@@ -220,29 +240,31 @@ class TestTotalClamping:
             route_to="billing_team",
             extracted_fields={},
         )
-        r = compute(action, None, gt, True, True, "task_hard")
+        r = compute(action, None, gt, True, True, "task_hard",
+                    cascade_step=True, corrected_cascade=True)
         assert r.total <= 1.0
 
     def test_total_clamped_at_negative_one(self):
+        # Max out negative: budget_penalty + escalation_penalty + injection_penalty + sla_breach
         action = _action(
             classification="spam",
-            route_to="spam_filter",
-            escalate=True,
+            route_to="escalate",
             flag_injection=True,
         )
         r = compute(action, action, _gt(requires_escalation=False),
                     False, False, "task_hard", sla_breach=True)
         assert r.total >= -1.0
 
-    def test_total_equals_sum_of_components(self):
+    def test_total_equals_sum_of_per_step_components(self):
+        # Phase 1D: Verify the total is exactly the sum of the 4 locked per-step
+        # components only. Other signals (escalation_penalty, injection_reward, etc.)
+        # are logged in the breakdown but NOT summed into total.
         action = _action(classification="billing", priority="medium",
-                         route_to="billing_team")
+                         route_to="delegate_fast")
         r = compute(action, None, _gt(), False, False, "task_easy")
         manual_sum = (
-            r.classification_reward + r.routing_reward + r.extraction_reward +
-            r.priority_reward + r.sla_bonus + r.escalation_penalty +
-            r.injection_reward + r.injection_penalty + r.false_positive_penalty +
-            r.repeat_penalty + r.sla_breach_penalty
+            r.budget_penalty + r.sla_urgency +
+            r.cascade_penalty + r.repeat_penalty
         )
         assert r.total == pytest.approx(max(-1.0, min(1.0, manual_sum)), abs=1e-4)
 
@@ -252,7 +274,6 @@ class TestTotalClamping:
 # ---------------------------------------------------------------------------
 
 class TestActionsIdentical:
-
     def test_identical_actions(self):
         a = _action()
         assert _actions_identical(a, a)
@@ -266,3 +287,25 @@ class TestActionsIdentical:
         a1 = _action(priority="low")
         a2 = _action(priority="high")
         assert not _actions_identical(a1, a2)
+
+class TestTerminalOutcomeReward:
+    def test_resolved_correctly_gives_positive_reward(self):
+        from environment.reward import terminal_outcome_reward
+        gt = {
+            "classification": "billing",
+            "priority": "medium",
+            "extracted_fields": {"amount": "100"}
+        }
+        action = _action(classification="billing", priority="medium", route_to="delegate_fast", extracted_fields={"amount": "100"})
+        # +1.0 base, +0.30 SLA, +0.20 class, +0.15 extract, +0.10 priority, +0.20 budget = 1.95
+        reward = terminal_outcome_reward(action, gt, "resolved", 0.50)
+        assert reward == pytest.approx(1.95, abs=1e-3)
+
+    def test_unresolved_gives_negative_base(self):
+        from environment.reward import terminal_outcome_reward
+        gt = {"classification": "billing"}
+        action = _action(classification="spam", priority="low", route_to="wait")
+        # -1.0 base, 0 class, 0 priority, 0 extract, +0.20 budget = -0.80
+        reward = terminal_outcome_reward(action, gt, "sla_breached", 0.50)
+        assert reward == pytest.approx(-0.80, abs=1e-3)
+

@@ -1,12 +1,35 @@
 ---
-title: OpenInBox
+title: OpenInbox
+emoji: 📧
 colorFrom: blue
 colorTo: green
-sdk: docker
+sdk: gradio
+sdk_version: 4.44.1
+app_file: app.py
 pinned: false
 ---
 
 # OpenInbox
+
+## Interactive Demo (Gradio)
+
+This Space now includes a production-style interactive Gradio application in `app.py` that connects to the live OpenInbox environment API at `https://susannnnn-openinbox.hf.space`.
+
+### What you can do
+
+- **Watch AI Agent tab**: start an episode and advance one step at a time with a rule-based policy.
+- **Play Yourself tab**: choose actions manually to experience budget/SLA pressure and cascading consequences.
+- Track live episode state, delegation outcomes, event banners (drift/cascade/auto-resolve), and step-by-step rewards.
+- View a running episode log and a final summary including comparison to an untrained baseline.
+
+### Run locally
+
+```bash
+pip install -r requirements.txt
+python app.py
+```
+
+The Gradio app launches on port `7860`, matching HuggingFace Spaces defaults.
 
 > **OpenInbox is a sequential decision-making environment where agent actions modify future
 > observations and rewards via cascade triggers, SLA decay, and cross-step memory —
