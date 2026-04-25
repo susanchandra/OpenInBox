@@ -1,0 +1,7 @@
+{
+  "tests/test_reward.py::TestRewardComponents::test_correct_classification_gives_reward": true,
+  "tests/test_reward.py::TestRewardComponents::test_wrong_classification_gives_zero": true,
+  "tests/test_reward.py::TestRewardComponents::test_correct_routing_gives_reward": true,
+  "tests/test_reward.py::TestRewardComponents::test_wrong_routing_gives_zero": true,
+  "tests/test_reward.py::TestTotalClamping::test_supervised_signals_not_in_total": true
+}
